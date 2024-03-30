@@ -1,0 +1,322 @@
+import {itCases} from '@augment-vir/browser-testing';
+import {MaybePromise, getOrSet, wait} from '@augment-vir/common';
+import {assert} from '@open-wc/testing';
+import {isStrictEqual} from 'run-time-assertions';
+import {IntervalObservable, IntervalObservableInit} from './interval-observable';
+import {ObservableEventTypes, allObservableEvents} from './observable-events';
+
+describe(IntervalObservable.name, () => {
+    async function testIntervalObservable(
+        callback: (instance: IntervalObservable<any, any>) => MaybePromise<void>,
+        init: IntervalObservableInit<any, any>,
+    ) {
+        const events: Partial<Record<ObservableEventTypes, string[]>> = {};
+
+        const equalityChecks: [any, any][] = [];
+
+        const instance = new IntervalObservable({
+            equalityCheck(a, b) {
+                equalityChecks.push([
+                    a,
+                    b,
+                ]);
+                return isStrictEqual(a, b);
+            },
+            ...init,
+            startPaused: true,
+        });
+
+        allObservableEvents.forEach((observableEvent) => {
+            instance.listenToEvent(observableEvent, (event) => {
+                const eventsByType = getOrSet(events, event.type, () => []);
+
+                eventsByType.push('detail' in event ? String(event.detail) : 'fired');
+            });
+        });
+
+        /** Setup all listeners before starting the interval. */
+        if (!init.startPaused) {
+            instance.resumeInterval();
+        }
+
+        await callback(instance);
+
+        instance.removeAllListeners();
+        instance.destroy();
+
+        return {
+            ...events,
+            ...(equalityChecks.length ? {equalityChecks} : {}),
+            finalValue: String(instance.value),
+            finalResolvedValue: String(instance.lastResolvedValue),
+        };
+    }
+
+    itCases(testIntervalObservable, [
+        {
+            it: 'blocks multiple updates within the rate limit',
+            inputs: [
+                async (instance) => {
+                    instance.update(1);
+                    instance.update(2);
+                    instance.update(3);
+                    instance.setValue('fake value');
+                    await wait(4500);
+                    instance.update(4);
+                },
+                {
+                    rateLimit: {seconds: 3},
+                    updateCallback(param: number) {
+                        return param.toFixed(2);
+                    },
+                },
+            ],
+            expect: {
+                'observable-callback-call': [
+                    'fired',
+                    'fired',
+                ],
+                'observable-interval-skip': [
+                    '[object Object]',
+                    '[object Object]',
+                ],
+                'observable-interval-rate-limited': [
+                    '[object Object]',
+                    '[object Object]',
+                    '[object Object]',
+                ],
+                'observable-params-update': [
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                ],
+                'observable-value-resolve': [
+                    '1.00',
+                    '4.00',
+                ],
+                'observable-value-update': [
+                    '1.00',
+                    '4.00',
+                ],
+                equalityChecks: [
+                    [
+                        2,
+                        1,
+                    ],
+                    [
+                        3,
+                        2,
+                    ],
+                    [
+                        4,
+                        3,
+                    ],
+                    [
+                        '1.00',
+                        '4.00',
+                    ],
+                ],
+                finalResolvedValue: '4.00',
+                finalValue: '4.00',
+            },
+        },
+        {
+            it: 'automatically updates',
+            inputs: [
+                async () => {
+                    await wait(4500);
+                },
+                {
+                    defaultParams: 2,
+                    intervalDuration: {seconds: 3},
+                    updateCallback(param: number) {
+                        return param.toFixed(2);
+                    },
+                },
+            ],
+            expect: {
+                'observable-callback-call': [
+                    'fired',
+                    'fired',
+                ],
+                'observable-interval-run': [
+                    '2',
+                    '2',
+                ],
+                'observable-value-resolve': [
+                    '2.00',
+                ],
+                'observable-value-update': [
+                    '2.00',
+                ],
+                equalityChecks: [
+                    [
+                        '2.00',
+                        '2.00',
+                    ],
+                ],
+                finalResolvedValue: '2.00',
+                finalValue: '2.00',
+            },
+        },
+        {
+            it: 'pauses and resumes updates',
+            inputs: [
+                async (instance) => {
+                    await wait(4500);
+                    instance.pauseInterval();
+                    await wait(4500);
+                    instance.resumeInterval();
+                },
+                {
+                    defaultParams: 2,
+                    intervalDuration: {seconds: 3},
+                    updateCallback(param: number) {
+                        return param.toFixed(2);
+                    },
+                },
+            ],
+            expect: {
+                'observable-callback-call': [
+                    'fired',
+                    'fired',
+                    'fired',
+                ],
+                'observable-interval-run': [
+                    '2',
+                    '2',
+                    '2',
+                ],
+                'observable-value-resolve': [
+                    '2.00',
+                ],
+                'observable-value-update': [
+                    '2.00',
+                ],
+                equalityChecks: [
+                    [
+                        '2.00',
+                        '2.00',
+                    ],
+                    [
+                        '2.00',
+                        '2.00',
+                    ],
+                ],
+                finalResolvedValue: '2.00',
+                finalValue: '2.00',
+            },
+        },
+        {
+            it: 'does nothing when resumeInterval is called on a running interval',
+            inputs: [
+                async (instance) => {
+                    assert.isFalse(instance.resumeInterval());
+                    await wait(4500);
+                },
+                {
+                    defaultParams: 2,
+                    intervalDuration: {seconds: 3},
+                    updateCallback(param: number) {
+                        return param.toFixed(2);
+                    },
+                },
+            ],
+            expect: {
+                'observable-callback-call': [
+                    'fired',
+                    'fired',
+                ],
+                'observable-interval-run': [
+                    '2',
+                    '2',
+                ],
+                'observable-value-resolve': [
+                    '2.00',
+                ],
+                'observable-value-update': [
+                    '2.00',
+                ],
+                equalityChecks: [
+                    [
+                        '2.00',
+                        '2.00',
+                    ],
+                ],
+                finalResolvedValue: '2.00',
+                finalValue: '2.00',
+            },
+        },
+        {
+            it: 'does nothing when pauseInterval is called on a stopped interval',
+            inputs: [
+                async (instance) => {
+                    assert.isFalse(instance.pauseInterval());
+                    await wait(4500);
+                },
+                {
+                    defaultParams: 2,
+                    intervalDuration: {seconds: 3},
+                    startPaused: true,
+                    updateCallback(param: number) {
+                        return param.toFixed(2);
+                    },
+                },
+            ],
+            expect: {
+                finalResolvedValue: 'undefined',
+                finalValue: '[object Promise]',
+            },
+        },
+        {
+            it: 'does not update for NoUpdate',
+            inputs: [
+                async () => {
+                    await wait(1000);
+                },
+                {
+                    defaultParams: undefined,
+                    intervalDuration: {seconds: 10},
+                    updateCallback() {
+                        return IntervalObservable.NoUpdate;
+                    },
+                },
+            ],
+            expect: {
+                'observable-callback-call': [
+                    'fired',
+                ],
+                'observable-interval-run': [
+                    'null',
+                ],
+                finalResolvedValue: 'undefined',
+                finalValue: '[object Promise]',
+            },
+        },
+    ]);
+
+    it('pauses updates when destroying', async () => {
+        let updateCount = 0;
+
+        const instance = new IntervalObservable({
+            defaultParams: undefined,
+            intervalDuration: {milliseconds: 10},
+            updateCallback() {
+                updateCount++;
+                return 'hi';
+            },
+        });
+
+        await wait(1000);
+
+        assert.isAbove(updateCount, 2);
+
+        instance.destroy();
+        const updateCountAfterDestroy = updateCount;
+
+        await wait(1000);
+
+        assert.isBelow(updateCount, updateCountAfterDestroy + 5);
+    });
+});

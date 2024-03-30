@@ -1,0 +1,26 @@
+import {join, resolve} from 'path';
+import type {TypeDocOptions} from 'typedoc';
+import {baseTypedocConfig} from 'virmator/dist/compiled-base-configs/base-typedoc';
+
+const repoRoot = resolve(__dirname, '..');
+const indexTsFile = join(repoRoot, 'src', 'index.ts');
+
+export const typeDocConfig: Partial<TypeDocOptions> = {
+    ...baseTypedocConfig,
+    out: join(repoRoot, 'dist-docs'),
+    entryPoints: [
+        indexTsFile,
+    ],
+    intentionallyNotExported: [],
+    navigation: {
+        includeCategories: true,
+    },
+    categoryOrder: [
+        'Main',
+        'Events',
+        'Util',
+        'Other',
+    ],
+    excludeProtected: true,
+    excludePrivate: true,
+};
