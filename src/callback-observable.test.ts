@@ -1,8 +1,16 @@
 import {itCases} from '@augment-vir/browser-testing';
-import {MaybePromise, createDeferredPromiseWrapper, getOrSet} from '@augment-vir/common';
+import {
+    MaybePromise,
+    createDeferredPromiseWrapper,
+    getOrSet,
+    randomString,
+    wait,
+    waitUntilTruthy,
+} from '@augment-vir/common';
 import {assert} from '@open-wc/testing';
 import {
     assertInstanceOf,
+    assertRunTimeType,
     assertStrictEqual,
     assertTypeOf,
     isStrictEqual,
@@ -505,4 +513,45 @@ describe(CallbackObservable.name, () => {
             },
         },
     ]);
+
+    it('ignores ongoing callbacks if setValue is called', async () => {
+        let resolved = false;
+        const updateDuration = {milliseconds: 500};
+
+        const instance = new CallbackObservable({
+            async updateCallback() {
+                await wait(updateDuration.milliseconds);
+                setTimeout(() => {
+                    resolved = true;
+                });
+                return 5;
+            },
+        });
+        instance.update();
+
+        assert.instanceOf(instance.value, Promise);
+
+        instance.setValue(42);
+
+        assert.isFalse(resolved);
+        await waitUntilTruthy(() => resolved);
+        await wait(updateDuration.milliseconds * 2);
+        assert.strictEqual(instance.value, 42);
+    });
+
+    it('forces an update from forceUpdate', async () => {
+        const instance = new CallbackObservable({
+            updateCallback(input: string) {
+                return randomString();
+            },
+        });
+        instance.update('hi');
+        const preForceValue = instance.value;
+        // does not update with the same input
+        instance.update('hi');
+        assert.strictEqual(instance.value, preForceValue);
+        assertRunTimeType(preForceValue, 'string');
+        instance.forceUpdate();
+        assert.notStrictEqual(instance.value, preForceValue);
+    });
 });

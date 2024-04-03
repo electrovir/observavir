@@ -116,6 +116,7 @@ export class AsyncObservable<Value> extends AnyObservable {
         if (!this.waitingForValueDeferredPromise.isSettled()) {
             this.waitingForValueDeferredPromise.resolve(value);
         }
+        this.lastSetPromise = undefined;
         this.dispatch(new ObservableValueResolveEvent({detail: value}));
         return true;
     }
