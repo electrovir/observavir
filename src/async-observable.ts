@@ -1,4 +1,4 @@
-import {createDeferredPromiseWrapper, ensureError} from '@augment-vir/common';
+import {createDeferredPromiseWrapper, ensureError, randomString} from '@augment-vir/common';
 import {isStrictEqual} from 'run-time-assertions';
 import {Simplify, Writable} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
@@ -41,6 +41,8 @@ export class AsyncObservable<Value> extends AnyObservable {
     public override equalityCheck: EqualityCheck<Simplify<Awaited<Value>>>;
     protected waitingForValueDeferredPromise = createDeferredPromiseWrapper<Awaited<Value>>();
     protected lastSetPromise: Promise<Awaited<Value>> | undefined;
+    /** Used to prevent setting different values from racing with each other. */
+    protected lastSetId = randomString();
     /**
      * The value which this observable currently contains. In this `AsyncObservable`, `value` may be
      * a promise, a resolved value, or an error.
@@ -70,7 +72,8 @@ export class AsyncObservable<Value> extends AnyObservable {
             /** Abort setting the promise if we already have set this promise. */
             return false;
         }
-
+        const newSetId = randomString();
+        this.lastSetId = newSetId;
         this.lastSetPromise = newPromise;
 
         if (this.waitingForValueDeferredPromise.isSettled()) {
@@ -81,14 +84,14 @@ export class AsyncObservable<Value> extends AnyObservable {
         newPromise
             .then((value) => {
                 /** Do nothing if we're not actually waiting for this promise anymore. */
-                if (this.lastSetPromise !== newPromise) {
+                if (this.lastSetPromise !== newPromise || this.lastSetId !== newSetId) {
                     return;
                 }
                 this.resolveValue(value);
             })
             .catch((reason: unknown) => {
                 /** Do nothing if we're not actually waiting for this promise anymore. */
-                if (this.lastSetPromise !== newPromise) {
+                if (this.lastSetPromise !== newPromise || this.lastSetId !== newSetId) {
                     return;
                 }
                 this.waitingForValueDeferredPromise.promise.catch(() => {
@@ -113,10 +116,10 @@ export class AsyncObservable<Value> extends AnyObservable {
             return false;
         }
 
+        this.lastSetId = randomString();
         if (!this.waitingForValueDeferredPromise.isSettled()) {
             this.waitingForValueDeferredPromise.resolve(value);
         }
-        this.lastSetPromise = undefined;
         this.dispatch(new ObservableValueResolveEvent({detail: value}));
         return true;
     }
