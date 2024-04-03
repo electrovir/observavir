@@ -10,7 +10,7 @@ export type UpdateCallback<Value, Params> =
     Exclude<Params, undefined> extends never ? () => Value : (params: Params) => Value;
 
 /** Constructor input for the callback observable class. */
-export type CallbackObservableInit<Value, Params> = Partial<{
+export type CallbackObservableInit<Value, Params = undefined> = Partial<{
     /** Starting value */
     defaultValue: Promise<Awaited<Value>> | Awaited<Value>;
     /**
@@ -42,7 +42,7 @@ export type CallbackObservableInit<Value, Params> = Partial<{
  *
  * @category Main
  */
-export class CallbackObservable<Value, Params> extends AsyncObservable<Value> {
+export class CallbackObservable<Value, Params = undefined> extends AsyncObservable<Value> {
     protected static readonly NotSet = Symbol('not set');
 
     /** The callback to call for updating `value`. Uses `lastParams` as its inputs. */
@@ -125,8 +125,14 @@ export class CallbackObservable<Value, Params> extends AsyncObservable<Value> {
      * @returns `true` if calling this triggered an update, `false` otherwise.
      * @throws `Error` if `updateCallback` or params have not been set yet.
      */
-    public update(params: Params): boolean {
-        if (!this.updateLastParams(params)) {
+    public update(
+        /**
+         * This complicated params type allows the args to be empty if Params is undefined but
+         * requires arguments otherwise.
+         */
+        ...[params]: Exclude<Params, undefined> extends never ? [] : [Params]
+    ): boolean {
+        if (!this.updateLastParams(params as Params)) {
             return false;
         }
 
