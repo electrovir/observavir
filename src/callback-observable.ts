@@ -7,10 +7,10 @@ import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
 
 /** Type for update callback provided to the callback observable class, used to update its value. */
-export type UpdateCallback<Value, Params> =
-    Exclude<Params, undefined> extends never
-        ? () => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>
-        : (params: Params) => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>;
+export type UpdateCallback<Value, Params> = (
+    params: Params,
+    previousResolvedValue: Value | undefined,
+) => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>;
 
 /** Constructor input for the callback observable class. */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{
@@ -94,7 +94,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
         }
 
         try {
-            return this.setValue(this.updateCallback(this.internalParams));
+            return this.setValue(this.updateCallback(this.internalParams, this.lastResolvedValue));
         } catch (error) {
             return this.setValue(ensureError(error));
             /* c8 ignore next: idk why it can't figure out this next line is covered */
