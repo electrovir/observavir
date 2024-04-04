@@ -9,6 +9,7 @@ import {
     isDateAfter,
 } from 'date-vir';
 import {Writable} from 'type-fest';
+import {AsyncValue} from './async-observable';
 import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable';
 import {noUpdate} from './no-update';
 import {
@@ -190,9 +191,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(
-        value: Promise<Awaited<Value>> | Awaited<Value> | Error | typeof noUpdate,
-    ): boolean {
+    public override setValue(value: AsyncValue<Value> | typeof noUpdate): boolean {
         if (this.isRateLimited()) {
             return false;
         }

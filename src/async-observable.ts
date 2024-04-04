@@ -11,12 +11,17 @@ import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observab
  * The possible types for an async observable's value, each representing a different potential phase
  * in the promise lifecycle.
  */
-export type AsyncValue<Value> = Error | Promise<Awaited<Value>> | Awaited<Value>;
+export type AsyncValue<Value> =
+    | Error
+    | Promise<Exclude<Awaited<Value>, typeof noUpdate>>
+    | Exclude<Awaited<Value>, typeof noUpdate>;
 
 /** Constructor input for the async observable class. */
 export type AsyncObservableInit<Value> = Partial<{
     /** Starting value */
-    defaultValue: Promise<Awaited<Value>> | Awaited<Value>;
+    defaultValue:
+        | Promise<Exclude<Awaited<Value>, typeof noUpdate>>
+        | Exclude<Awaited<Value>, typeof noUpdate>;
     /**
      * Callback to use to check equality between the current value and new values from
      * `.setValue()`. If the current value and the new value are equal, the new value will not be
@@ -25,7 +30,7 @@ export type AsyncObservableInit<Value> = Partial<{
      *
      * @default strict reference equality
      */
-    equalityCheck: EqualityCheck<Simplify<Awaited<Value>>> | undefined;
+    equalityCheck: EqualityCheck<Simplify<Exclude<Awaited<Value>, typeof noUpdate>>> | undefined;
 }>;
 
 /**
@@ -39,9 +44,12 @@ export class AsyncObservable<Value> extends AnyObservable {
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck: EqualityCheck<Simplify<Awaited<Value>>>;
-    protected waitingForValueDeferredPromise = createDeferredPromiseWrapper<Awaited<Value>>();
-    protected lastSetPromise: Promise<Awaited<Value>> | undefined;
+    public override equalityCheck: EqualityCheck<
+        Simplify<Exclude<Awaited<Value>, typeof noUpdate>>
+    >;
+    protected waitingForValueDeferredPromise =
+        createDeferredPromiseWrapper<Exclude<Awaited<Value>, typeof noUpdate>>();
+    protected lastSetPromise: Promise<Exclude<Awaited<Value>, typeof noUpdate>> | undefined;
     /** Used to prevent setting different values from racing with each other. */
     protected lastSetId = randomString();
     /**
@@ -57,7 +65,8 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * Do not set this directly. Use `setValue` instead.
      */
-    public readonly lastResolvedValue: Awaited<Value> | undefined = undefined;
+    public readonly lastResolvedValue: Awaited<Exclude<Value, typeof noUpdate>> | undefined =
+        undefined;
 
     constructor(init: Readonly<AsyncObservableInit<Value>> = {}) {
         super();
@@ -68,7 +77,7 @@ export class AsyncObservable<Value> extends AnyObservable {
         }
     }
 
-    protected setPromise(newPromise: Promise<Awaited<Value>>): boolean {
+    protected setPromise(newPromise: Promise<Exclude<Awaited<Value>, typeof noUpdate>>): boolean {
         if (newPromise === this.lastSetPromise) {
             /** Abort setting the promise if we already have set this promise. */
             return false;
@@ -111,7 +120,9 @@ export class AsyncObservable<Value> extends AnyObservable {
         return true;
     }
 
-    protected resolveValue(value: Awaited<Value> | typeof noUpdate): boolean {
+    protected resolveValue(
+        value: Exclude<Awaited<Value>, typeof noUpdate> | typeof noUpdate,
+    ): boolean {
         if (
             value === noUpdate ||
             !super.setValue(value, this.value instanceof Promise ? isStrictEqual : undefined)
@@ -144,9 +155,7 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(
-        value: Promise<Awaited<Value>> | Awaited<Value> | Error | typeof noUpdate,
-    ): boolean {
+    public override setValue(value: AsyncValue<Value> | typeof noUpdate): boolean {
         try {
             if (value instanceof Promise) {
                 return this.setPromise(value);

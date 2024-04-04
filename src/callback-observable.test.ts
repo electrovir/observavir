@@ -17,6 +17,7 @@ import {
 } from 'run-time-assertions';
 import {AsyncValue} from './async-observable';
 import {CallbackObservable, CallbackObservableInit} from './callback-observable';
+import {noUpdate} from './no-update';
 import {ObservableEventTypes, allObservableEvents} from './observable-events';
 
 describe(CallbackObservable.name, () => {
@@ -553,5 +554,16 @@ describe(CallbackObservable.name, () => {
         assertRunTimeType(preForceValue, 'string');
         instance.forceUpdate();
         assert.notStrictEqual(instance.value, preForceValue);
+    });
+
+    it('has proper types with noUpdate', async () => {
+        const instance = new CallbackObservable({
+            updateCallback(): string | typeof noUpdate {
+                return noUpdate;
+            },
+        });
+
+        assertTypeOf(instance.lastResolvedValue).toEqualTypeOf<string | undefined>();
+        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
     });
 });

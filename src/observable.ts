@@ -8,7 +8,7 @@ import {noUpdate} from './no-update';
 /** Constructor input for the observable class. */
 export type ObservableInit<Value> = {
     /** Starting value */
-    defaultValue: Value;
+    defaultValue: Exclude<Value, typeof noUpdate>;
     /**
      * Callback to use to check equality between the current value and new values from
      * `.setValue()`. If the current value and the new value are equal, the new value will not be
@@ -17,7 +17,7 @@ export type ObservableInit<Value> = {
      *
      * @default strict reference equality
      */
-    equalityCheck?: EqualityCheck<Simplify<Value>> | undefined;
+    equalityCheck?: EqualityCheck<Simplify<Exclude<Value, typeof noUpdate>>> | undefined;
 };
 
 /**
@@ -35,12 +35,14 @@ export class Observable<Value> extends AnyObservable {
      * Do not set this directly: use `setValue` instead. (If you try to set this value directly, it
      * won't fire listeners which defeats the entire purpose of using an observable.
      */
-    public override readonly value: Value;
+    public override readonly value: Exclude<Value, typeof noUpdate>;
     /**
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck: EqualityCheck<Simplify<Value>> | undefined;
+    public override equalityCheck:
+        | EqualityCheck<Simplify<Exclude<Value, typeof noUpdate>>>
+        | undefined;
 
     constructor(init: ObservableInit<Value>) {
         super();
@@ -64,7 +66,7 @@ export class Observable<Value> extends AnyObservable {
      */
     public override listen(
         /** The callback to fire when a new value is set on the observable. */
-        callback: ObservableListener<Value>,
+        callback: ObservableListener<Exclude<Value, typeof noUpdate>>,
     ): RemoveListenerCallback {
         return super.listen(callback);
     }
@@ -75,7 +77,9 @@ export class Observable<Value> extends AnyObservable {
      * @returns `true` if the callback was removed. `false` if the callback was not removed (meaning
      *   it was never added in the first place).
      */
-    public override removeListener(callback: ObservableListener<Value>): boolean {
+    public override removeListener(
+        callback: ObservableListener<Exclude<Value, typeof noUpdate>>,
+    ): boolean {
         return super.removeListener(callback);
     }
 }
