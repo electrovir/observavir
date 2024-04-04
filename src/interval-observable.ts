@@ -9,9 +9,8 @@ import {
     isDateAfter,
 } from 'date-vir';
 import {Writable} from 'type-fest';
-import {AsyncValue} from './async-observable';
 import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable';
-import {noUpdate} from './no-update';
+import {IncludeNoUpdate} from './no-update';
 import {
     ObservableIntervalRateLimitedEvent,
     ObservableIntervalRunEvent,
@@ -30,7 +29,7 @@ export type IntervalObservableInit<Value, Params> = Overwrite<
          * Otherwise, the `updateCallback` callback will only be called the first time (if there is
          * no `defaultValue` init).
          */
-        updateCallback: UpdateCallback<MaybePromise<Awaited<Value>>, Params>;
+        updateCallback: UpdateCallback<Value, Params>;
         /**
          * The minimum duration between updates. If multiple automatic or manual triggers occur
          * within this duration, only the first one will trigger actual updates.
@@ -191,7 +190,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(value: AsyncValue<Value> | typeof noUpdate): boolean {
+    public override setValue(value: Error | MaybePromise<IncludeNoUpdate<Value>>): boolean {
         if (this.isRateLimited()) {
             return false;
         }

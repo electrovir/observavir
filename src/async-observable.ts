@@ -1,27 +1,27 @@
-import {createDeferredPromiseWrapper, ensureError, randomString} from '@augment-vir/common';
+import {
+    MaybePromise,
+    createDeferredPromiseWrapper,
+    ensureError,
+    randomString,
+} from '@augment-vir/common';
 import {isStrictEqual} from 'run-time-assertions';
 import {Simplify, Writable} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
 import {EqualityCheck} from './equality-check';
-import {noUpdate} from './no-update';
+import {ExcludeNoUpdate, IncludeNoUpdate, isNotNoUpdate, noUpdate} from './no-update';
 import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events';
 
 /**
  * The possible types for an async observable's value, each representing a different potential phase
  * in the promise lifecycle.
  */
-export type AsyncValue<Value> =
-    | Error
-    | Promise<Exclude<Awaited<Value>, typeof noUpdate>>
-    | Exclude<Awaited<Value>, typeof noUpdate>;
+export type AsyncValue<Value> = Error | Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
 
 /** Constructor input for the async observable class. */
 export type AsyncObservableInit<Value> = Partial<{
     /** Starting value */
-    defaultValue:
-        | Promise<Exclude<Awaited<Value>, typeof noUpdate>>
-        | Exclude<Awaited<Value>, typeof noUpdate>;
+    defaultValue: Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
     /**
      * Callback to use to check equality between the current value and new values from
      * `.setValue()`. If the current value and the new value are equal, the new value will not be
@@ -30,7 +30,7 @@ export type AsyncObservableInit<Value> = Partial<{
      *
      * @default strict reference equality
      */
-    equalityCheck: EqualityCheck<Simplify<Exclude<Awaited<Value>, typeof noUpdate>>> | undefined;
+    equalityCheck: EqualityCheck<Simplify<ExcludeNoUpdate<Value>>> | undefined;
 }>;
 
 /**
@@ -44,12 +44,10 @@ export class AsyncObservable<Value> extends AnyObservable {
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck: EqualityCheck<
-        Simplify<Exclude<Awaited<Value>, typeof noUpdate>>
-    >;
+    public override equalityCheck: NonNullable<AsyncObservableInit<Value>['equalityCheck']>;
     protected waitingForValueDeferredPromise =
-        createDeferredPromiseWrapper<Exclude<Awaited<Value>, typeof noUpdate>>();
-    protected lastSetPromise: Promise<Exclude<Awaited<Value>, typeof noUpdate>> | undefined;
+        createDeferredPromiseWrapper<ExcludeNoUpdate<Value>>();
+    protected lastSetPromise: Promise<IncludeNoUpdate<Value>> | undefined;
     /** Used to prevent setting different values from racing with each other. */
     protected lastSetId = randomString();
     /**
@@ -77,7 +75,7 @@ export class AsyncObservable<Value> extends AnyObservable {
         }
     }
 
-    protected setPromise(newPromise: Promise<Exclude<Awaited<Value>, typeof noUpdate>>): boolean {
+    protected setPromise(newPromise: Promise<IncludeNoUpdate<Value>>): boolean {
         if (newPromise === this.lastSetPromise) {
             /** Abort setting the promise if we already have set this promise. */
             return false;
@@ -93,8 +91,13 @@ export class AsyncObservable<Value> extends AnyObservable {
 
         newPromise
             .then((value) => {
-                /** Do nothing if we're not actually waiting for this promise anymore. */
-                if (this.lastSetPromise !== newPromise || this.lastSetId !== newSetId) {
+                if (
+                    /** Do nothing if we're not actually waiting for this promise anymore. */
+                    this.lastSetPromise !== newPromise ||
+                    this.lastSetId !== newSetId ||
+                    /** Do nothing is `noUpdate` was triggered. */
+                    !isNotNoUpdate(value)
+                ) {
                     return;
                 }
                 this.resolveValue(value);
@@ -120,9 +123,7 @@ export class AsyncObservable<Value> extends AnyObservable {
         return true;
     }
 
-    protected resolveValue(
-        value: Exclude<Awaited<Value>, typeof noUpdate> | typeof noUpdate,
-    ): boolean {
+    protected resolveValue(value: ExcludeNoUpdate<Value>): boolean {
         if (
             value === noUpdate ||
             !super.setValue(value, this.value instanceof Promise ? isStrictEqual : undefined)
@@ -155,13 +156,15 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(value: AsyncValue<Value> | typeof noUpdate): boolean {
+    public override setValue(value: Error | MaybePromise<IncludeNoUpdate<Value>>): boolean {
         try {
             if (value instanceof Promise) {
                 return this.setPromise(value);
             } else if (value instanceof Error) {
                 this.rejectValue(value);
                 return true;
+            } else if (!isNotNoUpdate(value)) {
+                return false;
             } else {
                 return this.resolveValue(value);
             }

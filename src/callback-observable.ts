@@ -3,30 +3,26 @@ import {isLooseJsonEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable';
 import {EqualityCheck} from './equality-check';
-import {noUpdate} from './no-update';
+import {ExcludeNoUpdate, IncludeNoUpdate} from './no-update';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
 
 /** Type for update callback provided to the callback observable class, used to update its value. */
 export type UpdateCallback<Value, Params> =
     Exclude<Params, undefined> extends never
-        ? () => Value | typeof noUpdate
-        : (params: Params) => Value | typeof noUpdate;
+        ? () => MaybePromise<IncludeNoUpdate<Value>>
+        : (params: Params) => MaybePromise<IncludeNoUpdate<Value>>;
 
 /** Constructor input for the callback observable class. */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{
     /** Starting value */
-    defaultValue:
-        | Promise<Exclude<Awaited<Value>, typeof noUpdate>>
-        | Exclude<Awaited<Value>, typeof noUpdate>;
+    defaultValue: Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
     /**
      * When a trigger changes (according to the `equalityCheck`), this `updateCallback` will be
      * called and the observable's value will be updated again if it generates a new value.
      * Otherwise, the `updateCallback` callback will only be called the first time (if there is no
      * `defaultValue` init).
      */
-    updateCallback:
-        | UpdateCallback<MaybePromise<Exclude<Awaited<Value>, typeof noUpdate>>, Params>
-        | undefined;
+    updateCallback: UpdateCallback<Value, Params> | undefined;
     /**
      * Callback to use to check equality between the current value and new values from
      * `.setValue()`. If the current value and the new value are equal, the new value will not be
@@ -35,9 +31,7 @@ export type CallbackObservableInit<Value, Params = undefined> = Partial<{
      *
      * @default json equality
      */
-    equalityCheck:
-        | EqualityCheck<Simplify<Exclude<Awaited<Value>, typeof noUpdate>> | Params>
-        | undefined;
+    equalityCheck: EqualityCheck<Simplify<ExcludeNoUpdate<Value>> | Params> | undefined;
     /**
      * Starting parameters to use for `updateCallback`. Can be omitted entirely and set later with
      * `updateTrigger` or `forceUpdate`.
@@ -55,15 +49,13 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
     protected static readonly NotSet = Symbol('not set');
 
     /** The callback to call for updating `value`. Uses `lastParams` as its inputs. */
-    public updateCallback:
-        | UpdateCallback<MaybePromise<Exclude<Awaited<Value>, typeof noUpdate>>, Params>
-        | undefined;
+    public updateCallback: CallbackObservableInit<Value, Params>['updateCallback'];
     /**
      * The function used to check equality between different values for params or `value`. This can
      * be manually set at any time to change the function used.
      */
-    public override equalityCheck: EqualityCheck<
-        Simplify<Exclude<Awaited<Value>, typeof noUpdate>> | Params
+    public override equalityCheck: NonNullable<
+        CallbackObservableInit<Value, Params>['equalityCheck']
     >;
     /**
      * The last params for `updateCallback`. This can be set by the constructor, `updateTrigger`,

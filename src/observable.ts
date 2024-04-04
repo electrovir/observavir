@@ -3,12 +3,12 @@ import {Simplify} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
 import {EqualityCheck} from './equality-check';
-import {noUpdate} from './no-update';
+import {ExcludeNoUpdate, IncludeNoUpdate} from './no-update';
 
 /** Constructor input for the observable class. */
 export type ObservableInit<Value> = {
     /** Starting value */
-    defaultValue: Exclude<Value, typeof noUpdate>;
+    defaultValue: ExcludeNoUpdate<Value>;
     /**
      * Callback to use to check equality between the current value and new values from
      * `.setValue()`. If the current value and the new value are equal, the new value will not be
@@ -17,7 +17,7 @@ export type ObservableInit<Value> = {
      *
      * @default strict reference equality
      */
-    equalityCheck?: EqualityCheck<Simplify<Exclude<Value, typeof noUpdate>>> | undefined;
+    equalityCheck?: EqualityCheck<Simplify<ExcludeNoUpdate<Value>>> | undefined;
 };
 
 /**
@@ -35,14 +35,12 @@ export class Observable<Value> extends AnyObservable {
      * Do not set this directly: use `setValue` instead. (If you try to set this value directly, it
      * won't fire listeners which defeats the entire purpose of using an observable.
      */
-    public override readonly value: Exclude<Value, typeof noUpdate>;
+    public override readonly value: ObservableInit<Value>['defaultValue'];
     /**
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck:
-        | EqualityCheck<Simplify<Exclude<Value, typeof noUpdate>>>
-        | undefined;
+    public override equalityCheck: NonNullable<ObservableInit<Value>['equalityCheck']>;
 
     constructor(init: ObservableInit<Value>) {
         super();
@@ -55,7 +53,7 @@ export class Observable<Value> extends AnyObservable {
      * fired if the new value is not equal to the current value ("equal" determined by the
      * `equalityCheck` constructor parameter) or if equality checking is disabled.
      */
-    public override setValue(newValue: Value | typeof noUpdate): boolean {
+    public override setValue(newValue: IncludeNoUpdate<Value>): boolean {
         return super.setValue(newValue);
     }
 
@@ -66,7 +64,7 @@ export class Observable<Value> extends AnyObservable {
      */
     public override listen(
         /** The callback to fire when a new value is set on the observable. */
-        callback: ObservableListener<Exclude<Value, typeof noUpdate>>,
+        callback: ObservableListener<ExcludeNoUpdate<Value>>,
     ): RemoveListenerCallback {
         return super.listen(callback);
     }
@@ -77,9 +75,7 @@ export class Observable<Value> extends AnyObservable {
      * @returns `true` if the callback was removed. `false` if the callback was not removed (meaning
      *   it was never added in the first place).
      */
-    public override removeListener(
-        callback: ObservableListener<Exclude<Value, typeof noUpdate>>,
-    ): boolean {
+    public override removeListener(callback: ObservableListener<ExcludeNoUpdate<Value>>): boolean {
         return super.removeListener(callback);
     }
 }
