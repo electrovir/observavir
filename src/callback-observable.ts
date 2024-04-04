@@ -3,14 +3,14 @@ import {isLooseJsonEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable';
 import {EqualityCheck} from './equality-check';
-import {ExcludeNoUpdate, IncludeNoUpdate} from './no-update';
+import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
 
 /** Type for update callback provided to the callback observable class, used to update its value. */
 export type UpdateCallback<Value, Params> =
     Exclude<Params, undefined> extends never
-        ? () => MaybePromise<IncludeNoUpdate<Value>>
-        : (params: Params) => MaybePromise<IncludeNoUpdate<Value>>;
+        ? () => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>
+        : (params: Params) => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>;
 
 /** Constructor input for the callback observable class. */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{

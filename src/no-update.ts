@@ -10,4 +10,4 @@ export function isNotNoUpdate<T>(input: T): input is Exclude<T, typeof noUpdate>
 export type ExcludeNoUpdate<Value> = Exclude<Awaited<Value>, typeof noUpdate>;
 
 /** Add `noUpdate` as a potential value to the type parameter. */
-export type IncludeNoUpdate<Value> = Awaited<Value> | typeof noUpdate;
+export type AllowNoUpdate<Value> = Value | typeof noUpdate;

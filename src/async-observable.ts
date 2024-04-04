@@ -9,7 +9,7 @@ import {Simplify, Writable} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
 import {EqualityCheck} from './equality-check';
-import {ExcludeNoUpdate, IncludeNoUpdate, isNotNoUpdate, noUpdate} from './no-update';
+import {AllowNoUpdate, ExcludeNoUpdate, isNotNoUpdate, noUpdate} from './no-update';
 import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events';
 
 /**
@@ -47,7 +47,7 @@ export class AsyncObservable<Value> extends AnyObservable {
     public override equalityCheck: NonNullable<AsyncObservableInit<Value>['equalityCheck']>;
     protected waitingForValueDeferredPromise =
         createDeferredPromiseWrapper<ExcludeNoUpdate<Value>>();
-    protected lastSetPromise: Promise<IncludeNoUpdate<Value>> | undefined;
+    protected lastSetPromise: Promise<ExcludeNoUpdate<Value>> | undefined;
     /** Used to prevent setting different values from racing with each other. */
     protected lastSetId = randomString();
     /**
@@ -63,8 +63,7 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * Do not set this directly. Use `setValue` instead.
      */
-    public readonly lastResolvedValue: Awaited<Exclude<Value, typeof noUpdate>> | undefined =
-        undefined;
+    public readonly lastResolvedValue: ExcludeNoUpdate<Value> | undefined = undefined;
 
     constructor(init: Readonly<AsyncObservableInit<Value>> = {}) {
         super();
@@ -75,7 +74,7 @@ export class AsyncObservable<Value> extends AnyObservable {
         }
     }
 
-    protected setPromise(newPromise: Promise<IncludeNoUpdate<Value>>): boolean {
+    protected setPromise(newPromise: Promise<ExcludeNoUpdate<Value>>): boolean {
         if (newPromise === this.lastSetPromise) {
             /** Abort setting the promise if we already have set this promise. */
             return false;
@@ -91,13 +90,8 @@ export class AsyncObservable<Value> extends AnyObservable {
 
         newPromise
             .then((value) => {
-                if (
-                    /** Do nothing if we're not actually waiting for this promise anymore. */
-                    this.lastSetPromise !== newPromise ||
-                    this.lastSetId !== newSetId ||
-                    /** Do nothing is `noUpdate` was triggered. */
-                    !isNotNoUpdate(value)
-                ) {
+                /** Do nothing if we're not actually waiting for this promise anymore. */
+                if (this.lastSetPromise !== newPromise || this.lastSetId !== newSetId) {
                     return;
                 }
                 this.resolveValue(value);
@@ -156,7 +150,9 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(value: Error | MaybePromise<IncludeNoUpdate<Value>>): boolean {
+    public override setValue(
+        value: AllowNoUpdate<Error | MaybePromise<ExcludeNoUpdate<Value>>>,
+    ): boolean {
         try {
             if (value instanceof Promise) {
                 return this.setPromise(value);

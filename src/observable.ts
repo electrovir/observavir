@@ -3,7 +3,7 @@ import {Simplify} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
 import {EqualityCheck} from './equality-check';
-import {ExcludeNoUpdate, IncludeNoUpdate} from './no-update';
+import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
 
 /** Constructor input for the observable class. */
 export type ObservableInit<Value> = {
@@ -53,7 +53,7 @@ export class Observable<Value> extends AnyObservable {
      * fired if the new value is not equal to the current value ("equal" determined by the
      * `equalityCheck` constructor parameter) or if equality checking is disabled.
      */
-    public override setValue(newValue: IncludeNoUpdate<Value>): boolean {
+    public override setValue(newValue: AllowNoUpdate<Awaited<Value>>): boolean {
         return super.setValue(newValue);
     }
 

@@ -1,4 +1,4 @@
-import {MaybePromise, Overwrite, PartialAndUndefined, wrapInTry} from '@augment-vir/common';
+import {Overwrite, PartialAndUndefined, wrapInTry} from '@augment-vir/common';
 import {
     AnyDuration,
     DurationUnit,
@@ -9,8 +9,8 @@ import {
     isDateAfter,
 } from 'date-vir';
 import {Writable} from 'type-fest';
+import {AsyncObservable} from './async-observable';
 import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable';
-import {IncludeNoUpdate} from './no-update';
 import {
     ObservableIntervalRateLimitedEvent,
     ObservableIntervalRunEvent,
@@ -190,7 +190,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(value: Error | MaybePromise<IncludeNoUpdate<Value>>): boolean {
+    public override setValue(value: Parameters<AsyncObservable<Value>['setValue']>[0]): boolean {
         if (this.isRateLimited()) {
             return false;
         }
