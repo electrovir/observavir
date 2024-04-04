@@ -3,6 +3,7 @@ export * from './async-observable';
 export * from './callback-observable';
 export * from './equality-check';
 export * from './interval-observable';
+export * from './no-update';
 export * from './observable';
 export * from './observable-base';
 export * from './observable-events';

@@ -10,6 +10,7 @@ import {
 } from 'date-vir';
 import {Writable} from 'type-fest';
 import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable';
+import {noUpdate} from './no-update';
 import {
     ObservableIntervalRateLimitedEvent,
     ObservableIntervalRunEvent,
@@ -28,10 +29,7 @@ export type IntervalObservableInit<Value, Params> = Overwrite<
          * Otherwise, the `updateCallback` callback will only be called the first time (if there is
          * no `defaultValue` init).
          */
-        updateCallback: UpdateCallback<
-            MaybePromise<Awaited<Value>> | typeof IntervalObservable.NoUpdate,
-            Params
-        >;
+        updateCallback: UpdateCallback<MaybePromise<Awaited<Value>>, Params>;
         /**
          * The minimum duration between updates. If multiple automatic or manual triggers occur
          * within this duration, only the first one will trigger actual updates.
@@ -71,9 +69,6 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      */
     public readonly lastSetTime: FullDate | undefined;
     protected currentTimeoutId: undefined | number | NodeJS.Timeout;
-
-    /** Return this from `updateCallback` to skip an update. */
-    static readonly NoUpdate = Symbol('no update');
 
     constructor(init: IntervalObservableInit<Value, Params> = {}) {
         super(init as CallbackObservableInit<Value, Params>);
@@ -196,11 +191,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      * @returns `true` if the new value was set, `false` otherwise.
      */
     public override setValue(
-        value:
-            | Promise<Awaited<Value>>
-            | Awaited<Value>
-            | Error
-            | typeof IntervalObservable.NoUpdate,
+        value: Promise<Awaited<Value>> | Awaited<Value> | Error | typeof noUpdate,
     ): boolean {
         if (this.isRateLimited()) {
             return false;
@@ -208,11 +199,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
 
         (this as Writable<typeof this>).lastSetTime = getNowInUserTimezone();
 
-        if (value === IntervalObservable.NoUpdate) {
-            return false;
-        } else {
-            return super.setValue(value);
-        }
+        return super.setValue(value);
     }
 
     /**

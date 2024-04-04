@@ -11,6 +11,7 @@ import {
     ExtractEventTypes,
 } from 'typed-event-target/dist/esm/events/event-types';
 import {EqualityCheck} from './equality-check';
+import {noUpdate} from './no-update';
 import {ObservableBase} from './observable-base';
 import {
     ObservableDestroyEvent,
@@ -68,6 +69,10 @@ export abstract class AnyObservable
          */
         equalityCheck: EqualityCheck<any> | undefined = this.equalityCheck,
     ): boolean {
+        if (newValue === noUpdate) {
+            return false;
+        }
+
         if (!equalityCheck || !equalityCheck(this.value, newValue)) {
             (this as Writable<typeof this>).value = newValue;
             this.dispatch(new ObservableValueUpdateEvent({detail: newValue}));

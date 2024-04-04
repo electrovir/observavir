@@ -3,11 +3,14 @@ import {isLooseJsonEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable';
 import {EqualityCheck} from './equality-check';
+import {noUpdate} from './no-update';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
 
 /** Type for update callback provided to the callback observable class, used to update its value. */
 export type UpdateCallback<Value, Params> =
-    Exclude<Params, undefined> extends never ? () => Value : (params: Params) => Value;
+    Exclude<Params, undefined> extends never
+        ? () => Value | typeof noUpdate
+        : (params: Params) => Value | typeof noUpdate;
 
 /** Constructor input for the callback observable class. */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{

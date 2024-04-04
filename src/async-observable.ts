@@ -4,6 +4,7 @@ import {Simplify, Writable} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
 import {EqualityCheck} from './equality-check';
+import {noUpdate} from './no-update';
 import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events';
 
 /**
@@ -110,11 +111,14 @@ export class AsyncObservable<Value> extends AnyObservable {
         return true;
     }
 
-    protected resolveValue(value: Awaited<Value>): boolean {
-        (this as Writable<typeof this>).lastResolvedValue = value as typeof this.lastResolvedValue;
-        if (!super.setValue(value, this.value instanceof Promise ? isStrictEqual : undefined)) {
+    protected resolveValue(value: Awaited<Value> | typeof noUpdate): boolean {
+        if (
+            value === noUpdate ||
+            !super.setValue(value, this.value instanceof Promise ? isStrictEqual : undefined)
+        ) {
             return false;
         }
+        (this as Writable<typeof this>).lastResolvedValue = value as typeof this.lastResolvedValue;
 
         this.lastSetId = randomString();
         if (!this.waitingForValueDeferredPromise.isSettled()) {
@@ -140,7 +144,9 @@ export class AsyncObservable<Value> extends AnyObservable {
      *
      * @returns `true` if the new value was set, `false` otherwise.
      */
-    public override setValue(value: Promise<Awaited<Value>> | Awaited<Value> | Error): boolean {
+    public override setValue(
+        value: Promise<Awaited<Value>> | Awaited<Value> | Error | typeof noUpdate,
+    ): boolean {
         try {
             if (value instanceof Promise) {
                 return this.setPromise(value);

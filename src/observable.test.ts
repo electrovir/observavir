@@ -1,5 +1,6 @@
 import {assert} from '@open-wc/testing';
 import {assertTypeOf, isLooseEqual} from 'run-time-assertions';
+import {noUpdate} from './no-update';
 import {Observable} from './observable';
 
 describe(Observable.name, () => {
@@ -62,6 +63,13 @@ describe(Observable.name, () => {
         assert.deepStrictEqual(results, [
             'different string',
         ]);
+    });
+
+    it('does not update if the value is noUpdate', () => {
+        const instance = new Observable({defaultValue: 'hi'});
+
+        instance.setValue(noUpdate);
+        assert.strictEqual(instance.value, 'hi');
     });
 
     it('supports different equality checks', () => {

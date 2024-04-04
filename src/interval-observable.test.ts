@@ -3,6 +3,7 @@ import {MaybePromise, getOrSet, wait} from '@augment-vir/common';
 import {assert} from '@open-wc/testing';
 import {isStrictEqual} from 'run-time-assertions';
 import {IntervalObservable, IntervalObservableInit} from './interval-observable';
+import {noUpdate} from './no-update';
 import {ObservableEventTypes, allObservableEvents} from './observable-events';
 
 describe(IntervalObservable.name, () => {
@@ -270,7 +271,7 @@ describe(IntervalObservable.name, () => {
             },
         },
         {
-            it: 'does not update for NoUpdate',
+            it: 'does not update for noUpdate',
             inputs: [
                 async () => {
                     await wait(1000);
@@ -279,7 +280,7 @@ describe(IntervalObservable.name, () => {
                     defaultParams: undefined,
                     intervalDuration: {seconds: 10},
                     updateCallback() {
-                        return IntervalObservable.NoUpdate;
+                        return noUpdate;
                     },
                 },
             ],
