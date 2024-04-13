@@ -8,7 +8,7 @@ import {RemoveListenerCallback} from 'typed-event-target';
  */
 export const observableBaseShape = defineShape({
     /** Listen to value changes. */
-    listen(callback: AnyFunction): RemoveListenerCallback {
+    listen(fireImmediately: boolean, callback: AnyFunction): RemoveListenerCallback {
         return () => false;
     },
     /** Free up resources. */

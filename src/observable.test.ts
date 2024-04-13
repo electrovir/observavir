@@ -1,3 +1,4 @@
+import {randomString} from '@augment-vir/common';
 import {assert} from '@open-wc/testing';
 import {assertTypeOf, isLooseEqual} from 'run-time-assertions';
 import {noUpdate} from './no-update';
@@ -9,7 +10,7 @@ describe(Observable.name, () => {
 
         const instance = new Observable({defaultValue: 'hi'});
 
-        instance.listen((newValue) => {
+        instance.listen(false, (newValue) => {
             results.push(newValue);
         });
 
@@ -28,7 +29,7 @@ describe(Observable.name, () => {
 
         const instance = new Observable({defaultValue: 'hi'});
 
-        const removeListener = instance.listen((newValue) => {
+        const removeListener = instance.listen(false, (newValue) => {
             results.push(newValue);
         });
 
@@ -52,7 +53,7 @@ describe(Observable.name, () => {
             results.push(newValue);
         };
 
-        instance.listen(callback);
+        instance.listen(false, callback);
 
         instance.setValue('different string');
 
@@ -77,7 +78,7 @@ describe(Observable.name, () => {
 
         const instance = new Observable({defaultValue: '5', equalityCheck: isLooseEqual});
 
-        instance.listen((newValue: string) => {
+        instance.listen(false, (newValue: string) => {
             results.push(newValue);
         });
 
@@ -102,8 +103,22 @@ describe(Observable.name, () => {
         // @ts-expect-error: wrong type for equality check callback
         new Observable({defaultValue: 'hi', equalityCheck: (a: number, b: number) => true});
 
-        instance.listen((value) => {
+        instance.listen(false, (value) => {
             assertTypeOf(value).toEqualTypeOf<string>();
         });
+    });
+
+    it('fires a listener immediately', () => {
+        const results: string[] = [];
+
+        const defaultValue = randomString();
+        const instance = new Observable({defaultValue});
+
+        instance.listen(true, (value) => {
+            results.push(value);
+        });
+
+        assert.deepStrictEqual(results, [defaultValue]);
+        assert.strictEqual(instance.getListenerCount(), 1);
     });
 });

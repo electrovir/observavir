@@ -63,10 +63,12 @@ export class Observable<Value> extends AnyObservable {
      * @returns A callback to remove the listener.
      */
     public override listen(
+        /** If true, the callback will immediately be fired with whatever the current value is. */
+        fireImmediately: boolean,
         /** The callback to fire when a new value is set on the observable. */
         callback: ObservableListener<ExcludeNoUpdate<Value>>,
     ): RemoveListenerCallback {
-        return super.listen(callback);
+        return super.listen(fireImmediately, callback);
     }
 
     /**

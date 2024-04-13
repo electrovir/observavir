@@ -99,6 +99,8 @@ export abstract class AnyObservable implements ObservableBase {
      * @returns A callback to remove the listener.
      */
     public listen(
+        /** If true, the callback will immediately be fired with whatever the current value is. */
+        fireImmediately: boolean,
         /** The callback to fire when a new value is set on the observable. */
         callback: ObservableListener<any>,
     ): RemoveListenerCallback {
@@ -106,6 +108,11 @@ export abstract class AnyObservable implements ObservableBase {
             return callback(event.detail);
         };
         this.listenerMap.set(callback, mapped);
+
+        if (fireImmediately) {
+            callback(this.value);
+        }
+
         return this.listenTarget.listen(ObservableValueUpdateEvent, mapped);
     }
 

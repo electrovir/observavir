@@ -385,7 +385,7 @@ describe(AsyncObservable.name, () => {
 
         const valueUpdates: string[] = [];
 
-        instance.listen((newValue) => {
+        instance.listen(false, (newValue) => {
             valueUpdates.push(newValue);
         });
 
@@ -417,7 +417,7 @@ describe(AsyncObservable.name, () => {
         // @ts-expect-error input wrong type
         instance.setValue(Promise.resolve(32));
 
-        instance.listen((value) => {
+        instance.listen(false, (value) => {
             assertTypeOf(value).toEqualTypeOf<string>();
         });
 
