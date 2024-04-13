@@ -53,14 +53,28 @@ export abstract class AnyObservable implements ObservableBase {
         >
     >();
 
+    /**
+     * Dispatch a typed event. Causes all attached listeners listening to this event to be fired.
+     *
+     * @returns The number of listeners that were fired.
+     */
     protected dispatch(...args: Parameters<typeof this.listenTarget.dispatch>) {
         return this.listenTarget.dispatch(...args);
     }
 
+    /**
+     * Remove all currently attached event listeners.
+     *
+     * @returns The number of listeners that were removed.
+     */
     public removeAllListeners() {
         return this.listenTarget.removeAllListeners();
     }
 
+    /**
+     * Get a count of all currently attached listeners. If a listener is removed, it will no longer
+     * be counted.
+     */
     public getListenerCount() {
         return this.listenTarget.getListenerCount();
     }
