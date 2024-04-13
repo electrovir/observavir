@@ -26,10 +26,9 @@ export type ObservableListener<Value> = (value: Value) => MaybePromise<void>;
  * A non-type-safe observable implementation meant as a base for more advanced, type safe
  * observables like `Observable` or `AsyncObservable`, etc.
  */
-export abstract class AnyObservable
-    extends ListenTarget<ObservableEvents>
-    implements ObservableBase
-{
+export abstract class AnyObservable implements ObservableBase {
+    private listenTarget = new ListenTarget<ObservableEvents>();
+
     /**
      * The value currently contained with the observable.
      *
@@ -54,6 +53,18 @@ export abstract class AnyObservable
         >
     >();
 
+    protected dispatch(...args: Parameters<typeof this.listenTarget.dispatch>) {
+        return this.listenTarget.dispatch(...args);
+    }
+
+    public removeAllListeners() {
+        return this.listenTarget.removeAllListeners();
+    }
+
+    public getListenerCount() {
+        return this.listenTarget.getListenerCount();
+    }
+
     /**
      * Set a new value to the observable. The new value will only be set and listeners will only be
      * fired if the new value is not equal to the current value ("equal" determined by the
@@ -75,7 +86,7 @@ export abstract class AnyObservable
 
         if (!equalityCheck || !equalityCheck(this.value, newValue)) {
             (this as Writable<typeof this>).value = newValue;
-            this.dispatch(new ObservableValueUpdateEvent({detail: newValue}));
+            this.listenTarget.dispatch(new ObservableValueUpdateEvent({detail: newValue}));
             return true;
         }
 
@@ -87,7 +98,7 @@ export abstract class AnyObservable
      *
      * @returns A callback to remove the listener.
      */
-    public override listen(
+    public listen(
         /** The callback to fire when a new value is set on the observable. */
         callback: ObservableListener<any>,
     ): RemoveListenerCallback {
@@ -95,7 +106,7 @@ export abstract class AnyObservable
             return callback(event.detail);
         };
         this.listenerMap.set(callback, mapped);
-        return super.listen(ObservableValueUpdateEvent, mapped);
+        return this.listenTarget.listen(ObservableValueUpdateEvent, mapped);
     }
 
     /**
@@ -104,15 +115,15 @@ export abstract class AnyObservable
      * @returns `true` if the callback was removed. `false` if the callback was not removed (meaning
      *   it was never added in the first place).
      */
-    public override removeListener(callback: ObservableListener<any>): boolean {
+    public removeListener(callback: ObservableListener<any>): boolean {
         const mapped = this.listenerMap.get(callback);
-        return !!mapped && super.removeListener(ObservableValueUpdateEvent, mapped);
+        return !!mapped && this.listenTarget.removeListener(ObservableValueUpdateEvent, mapped);
     }
 
     /** Clean up all listeners and any other internal state. */
-    public override destroy(): void {
-        this.dispatch(new ObservableDestroyEvent());
-        super.destroy();
+    public destroy(): void {
+        this.listenTarget.dispatch(new ObservableDestroyEvent());
+        this.listenTarget.destroy();
     }
 
     /**
@@ -131,6 +142,6 @@ export abstract class AnyObservable
         >,
         options?: ListenOptions | undefined,
     ): RemoveListenerCallback {
-        return super.listen(eventDefinition, listenerCallback, options);
+        return this.listenTarget.listen(eventDefinition, listenerCallback, options);
     }
 }
