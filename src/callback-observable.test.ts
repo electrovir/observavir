@@ -38,6 +38,7 @@ describe(CallbackObservable.name, () => {
 
         // @ts-expect-error: update inputs should be the params
         instance.update('hi');
+        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
         assert.instanceOf(instance.value, Error);
 
         instance.update({
@@ -45,14 +46,13 @@ describe(CallbackObservable.name, () => {
             value2: 3,
         });
 
-        assert.strictEqual(instance.value, 'hi hi hi ');
-        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
+        assert.strictEqual<unknown>(instance.value, 'hi hi hi ');
 
         /** Can be called without params. */
         instance.forceUpdate();
 
         instance.setValue('hi');
-        assert.strictEqual(instance.value, 'hi');
+        assert.strictEqual<unknown>(instance.value, 'hi');
     });
 
     async function testCallbackObservable(
@@ -537,7 +537,7 @@ describe(CallbackObservable.name, () => {
         assert.isFalse(resolved);
         await waitUntilTruthy(() => resolved);
         await wait(updateDuration.milliseconds * 2);
-        assert.strictEqual(instance.value, 42);
+        assert.strictEqual<unknown>(instance.value, 42);
     });
 
     it('forces an update from forceUpdate', async () => {

@@ -1,5 +1,5 @@
 import {MaybePromise, ensureError, isLengthAtLeast} from '@augment-vir/common';
-import {isLooseJsonEqual} from 'run-time-assertions';
+import {arePropsStrictEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable';
 import {EqualityCheck} from './equality-check';
@@ -75,7 +75,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
 
     constructor(init: Readonly<CallbackObservableInit<Value, Params>> = {}) {
         super(init);
-        this.equalityCheck = init.equalityCheck || isLooseJsonEqual;
+        this.equalityCheck = init.equalityCheck || arePropsStrictEqual;
         this.updateCallback = init.updateCallback;
         this.internalParams =
             'defaultParams' in init ? init.defaultParams : CallbackObservable.NotSet;
