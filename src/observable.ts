@@ -1,7 +1,7 @@
-import {isStrictEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, ObservableListener} from './any-observable';
+import {observableEqualityCheck} from './custom-equality-checker';
 import {EqualityCheck} from './equality-check';
 import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
 
@@ -45,7 +45,7 @@ export class Observable<Value> extends AnyObservable {
     constructor(init: ObservableInit<Value>) {
         super();
         this.value = init.defaultValue;
-        this.equalityCheck = init.equalityCheck || isStrictEqual;
+        this.equalityCheck = init.equalityCheck || observableEqualityCheck;
     }
 
     /**

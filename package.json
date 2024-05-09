@@ -1,6 +1,6 @@
 {
     "name": "observavir",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "flexible observables",
     "keywords": [
         "observable",
@@ -42,7 +42,7 @@
         "@augment-vir/common": "^28.0.0",
         "date-vir": "^5.1.4",
         "object-shape-tester": "^2.3.2",
-        "run-time-assertions": "^1.4.3",
+        "run-time-assertions": "^1.5.0",
         "type-fest": "^4.18.2",
         "typed-event-target": "^3.4.0"
     },

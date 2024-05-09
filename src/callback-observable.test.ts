@@ -415,37 +415,6 @@ describe(CallbackObservable.name, () => {
             },
         },
         {
-            it: 'defaults ti isLooseEqual',
-            inputs: [
-                async (instance) => {
-                    instance.update('hello');
-                    instance.update('hello');
-                },
-                {
-                    equalityCheck: undefined,
-                    updateCallback(param: string) {
-                        return param.toUpperCase();
-                    },
-                },
-            ],
-            expect: {
-                'observable-callback-call': [
-                    'fired',
-                ],
-                'observable-params-update': [
-                    'hello',
-                ],
-                'observable-value-resolve': [
-                    'HELLO',
-                ],
-                'observable-value-update': [
-                    'HELLO',
-                ],
-                finalValue: 'HELLO',
-                finalResolvedValue: 'HELLO',
-            },
-        },
-        {
             it: 'handles equality check errors',
             inputs: [
                 async (instance) => {
@@ -538,6 +507,32 @@ describe(CallbackObservable.name, () => {
         await waitUntilTruthy(() => resolved);
         await wait(updateDuration.milliseconds * 2);
         assert.strictEqual<unknown>(instance.value, 42);
+    });
+
+    it('ignores function properties', () => {
+        let counter = 0;
+
+        const instance = new CallbackObservable({
+            updateCallback(params: any) {
+                return ++counter;
+            },
+        });
+
+        instance.update({
+            a: 0,
+            b: () => {},
+        });
+
+        assert.strictEqual(counter, 1);
+        assert.strictEqual(instance.value, 1);
+
+        instance.update({
+            a: 0,
+            b: () => {},
+        });
+
+        assert.strictEqual(counter, 1);
+        assert.strictEqual(instance.value, 1);
     });
 
     it('forces an update from forceUpdate', async () => {

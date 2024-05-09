@@ -1,7 +1,7 @@
 import {MaybePromise, ensureError, isLengthAtLeast} from '@augment-vir/common';
-import {arePropsStrictEqual} from 'run-time-assertions';
 import {Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable';
+import {observableEqualityCheck} from './custom-equality-checker';
 import {EqualityCheck} from './equality-check';
 import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
@@ -75,7 +75,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
 
     constructor(init: Readonly<CallbackObservableInit<Value, Params>> = {}) {
         super(init);
-        this.equalityCheck = init.equalityCheck || arePropsStrictEqual;
+        this.equalityCheck = init.equalityCheck || observableEqualityCheck;
         this.updateCallback = init.updateCallback;
         this.internalParams =
             'defaultParams' in init ? init.defaultParams : CallbackObservable.NotSet;
