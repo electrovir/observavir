@@ -1,11 +1,15 @@
 import {Simplify} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
-import {AnyObservable, ObservableListener} from './any-observable';
-import {observableEqualityCheck} from './custom-equality-checker';
-import {EqualityCheck} from './equality-check';
-import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
+import {AnyObservable, ObservableListener} from './any-observable.js';
+import {observableEqualityCheck} from './custom-equality-checker.js';
+import {EqualityCheck} from './equality-check.js';
+import {AllowNoUpdate, ExcludeNoUpdate} from './no-update.js';
 
-/** Constructor input for the observable class. */
+/**
+ * Constructor input for {@link Observable}.
+ *
+ * @category Type
+ */
 export type ObservableInit<Value> = {
     /** Starting value */
     defaultValue: ExcludeNoUpdate<Value>;
@@ -26,7 +30,7 @@ export type ObservableInit<Value> = {
  * value is not set. Equality checking can be turned off by passing `undefined` as the
  * `equalityCheck` constructor parameter or by passing a different equality check callback.
  *
- * @category Main
+ * @category Observable
  */
 export class Observable<Value> extends AnyObservable {
     /**

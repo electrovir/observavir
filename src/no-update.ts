@@ -1,13 +1,30 @@
-/** Return this from any Observable callback to skip assigning the callback's output. */
+/**
+ * Return this from any Observable callback to skip assigning the callback's output as the new
+ * observable value.
+ *
+ * @category Observable
+ */
 export const noUpdate = Symbol('no update');
 
-/** Type guards the input as not including `noUpdate`. */
-export function isNotNoUpdate<T>(input: T): input is Exclude<T, typeof noUpdate> {
+/**
+ * Type guards the input as not including {@link noUpdate}.
+ *
+ * @category Internal
+ */
+export function isNotNoUpdate<T>(input: T): input is ExcludeNoUpdate<T> {
     return input !== noUpdate;
 }
 
-/** Remove `noUpdate` as a potential value from the type parameter. */
+/**
+ * Remove {@link noUpdate} from the given union.
+ *
+ * @category Internal
+ */
 export type ExcludeNoUpdate<Value> = Exclude<Awaited<Value>, typeof noUpdate>;
 
-/** Add `noUpdate` as a potential value to the type parameter. */
+/**
+ * Union {@link noUpdate} with the given type.
+ *
+ * @category Internal
+ */
 export type AllowNoUpdate<Value> = Value | typeof noUpdate;

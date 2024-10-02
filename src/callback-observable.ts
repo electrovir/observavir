@@ -1,18 +1,27 @@
-import {MaybePromise, ensureError, isLengthAtLeast} from '@augment-vir/common';
+import {check} from '@augment-vir/assert';
+import {MaybePromise, ensureError} from '@augment-vir/common';
 import {Simplify} from 'type-fest';
-import {AsyncObservable} from './async-observable';
-import {observableEqualityCheck} from './custom-equality-checker';
-import {EqualityCheck} from './equality-check';
-import {AllowNoUpdate, ExcludeNoUpdate} from './no-update';
-import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events';
+import {AsyncObservable} from './async-observable.js';
+import {observableEqualityCheck} from './custom-equality-checker.js';
+import {EqualityCheck} from './equality-check.js';
+import {AllowNoUpdate, ExcludeNoUpdate} from './no-update.js';
+import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events.js';
 
-/** Type for update callback provided to the callback observable class, used to update its value. */
+/**
+ * Type for update callback provided to {@link CallbackObservable}, used to update its value.
+ *
+ * @category Type
+ */
 export type UpdateCallback<Value, Params> = (
     params: Params,
     previousResolvedValue: Value | undefined,
 ) => AllowNoUpdate<MaybePromise<ExcludeNoUpdate<Value>>>;
 
-/** Constructor input for the callback observable class. */
+/**
+ * Constructor input for {@link CallbackObservable}.
+ *
+ * @category Type
+ */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{
     /** Starting value */
     defaultValue: Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
@@ -43,7 +52,7 @@ export type CallbackObservableInit<Value, Params = undefined> = Partial<{
  * An observable that updates its value by calling a provided callback with the provided parameters.
  * The callback will only be triggered if the parameters change.
  *
- * @category Main
+ * @category Observable
  */
 export class CallbackObservable<Value, Params = undefined> extends AsyncObservable<Value> {
     protected static readonly NotSet = Symbol('not set');
@@ -97,7 +106,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
             return this.setValue(this.updateCallback(this.internalParams, this.lastResolvedValue));
         } catch (error) {
             return this.setValue(ensureError(error));
-            /* c8 ignore next: idk why it can't figure out this next line is covered */
+            /* node:coverage ignore next: idk why it can't figure out this next line is covered */
         } finally {
             this.dispatch(new ObservableCallbackCallEvent());
         }
@@ -164,9 +173,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
      * @throws `Error` if `updateCallback` or params have not been set yet.
      */
     public forceUpdate(...args: [Params?]): boolean {
-        const hasInputParams = isLengthAtLeast(args, 1);
-
-        if (hasInputParams) {
+        if (check.isLengthAtLeast(args, 1)) {
             this.updateLastParams(args[0]);
         }
 

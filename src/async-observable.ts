@@ -1,25 +1,26 @@
-import {
-    MaybePromise,
-    createDeferredPromiseWrapper,
-    ensureError,
-    randomString,
-} from '@augment-vir/common';
-import {isStrictEqual} from 'run-time-assertions';
+import {check} from '@augment-vir/assert';
+import {DeferredPromise, MaybePromise, ensureError, randomString} from '@augment-vir/common';
 import {Simplify, Writable} from 'type-fest';
 import {RemoveListenerCallback} from 'typed-event-target';
-import {AnyObservable, ObservableListener} from './any-observable';
-import {observableEqualityCheck} from './custom-equality-checker';
-import {EqualityCheck} from './equality-check';
-import {AllowNoUpdate, ExcludeNoUpdate, isNotNoUpdate, noUpdate} from './no-update';
-import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events';
+import {AnyObservable, ObservableListener} from './any-observable.js';
+import {observableEqualityCheck} from './custom-equality-checker.js';
+import {EqualityCheck} from './equality-check.js';
+import {AllowNoUpdate, ExcludeNoUpdate, isNotNoUpdate} from './no-update.js';
+import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events.js';
 
 /**
  * The possible types for an async observable's value, each representing a different potential phase
  * in the promise lifecycle.
+ *
+ * @category Type
  */
 export type AsyncValue<Value> = Error | Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
 
-/** Constructor input for the async observable class. */
+/**
+ * Constructor input for {@link AsyncObservable}.
+ *
+ * @category Type
+ */
 export type AsyncObservableInit<Value> = Partial<{
     /** Starting value */
     defaultValue: Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
@@ -38,7 +39,7 @@ export type AsyncObservableInit<Value> = Partial<{
  * An observable that can handle promises and updates listeners for each stage in the promise
  * lifecycle. It also stores the last resolved value.
  *
- * @category Main
+ * @category Observable
  */
 export class AsyncObservable<Value> extends AnyObservable {
     /**
@@ -46,23 +47,22 @@ export class AsyncObservable<Value> extends AnyObservable {
      * time to change the function used.
      */
     public override equalityCheck: NonNullable<AsyncObservableInit<Value>['equalityCheck']>;
-    protected waitingForValueDeferredPromise =
-        createDeferredPromiseWrapper<ExcludeNoUpdate<Value>>();
-    protected lastSetPromise: Promise<ExcludeNoUpdate<Value>> | undefined;
+    protected waitingForValueDeferredPromise = new DeferredPromise<ExcludeNoUpdate<Value>>();
+    protected lastSetPromise: Promise<AllowNoUpdate<Value>> | undefined;
     /** Used to prevent setting different values from racing with each other. */
     protected lastSetId = randomString();
     /**
      * The value which this observable currently contains. In this `AsyncObservable`, `value` may be
      * a promise, a resolved value, or an error.
      *
-     * Do not set this directly. Use `setValue` instead.
+     * Do not set this directly. Use {@link AsyncObservable.setValue} instead.
      */
     public override readonly value: AsyncValue<Value> = this.waitingForValueDeferredPromise.promise;
     /**
      * The last resolved value. This only changes when `value` is set to a resolved value or when a
      * promise `value` resolves.
      *
-     * Do not set this directly. Use `setValue` instead.
+     * Do not set this directly. Use {@link AsyncObservable.setValue} instead.
      */
     public readonly lastResolvedValue: ExcludeNoUpdate<Value> | undefined = undefined;
 
@@ -75,7 +75,11 @@ export class AsyncObservable<Value> extends AnyObservable {
         }
     }
 
-    protected setPromise(newPromise: Promise<ExcludeNoUpdate<Value>>): boolean {
+    /**
+     * Internally sets a new promise as the current value. This is called by
+     * {@link AsyncObservable.setValue} if the given value is a promise.
+     */
+    protected setPromise(newPromise: Promise<AllowNoUpdate<Value>>): boolean {
         if (newPromise === this.lastSetPromise) {
             /** Abort setting the promise if we already have set this promise. */
             return false;
@@ -84,9 +88,9 @@ export class AsyncObservable<Value> extends AnyObservable {
         this.lastSetId = newSetId;
         this.lastSetPromise = newPromise;
 
-        if (this.waitingForValueDeferredPromise.isSettled()) {
-            this.waitingForValueDeferredPromise = createDeferredPromiseWrapper();
-            super.setValue(this.waitingForValueDeferredPromise.promise, isStrictEqual);
+        if (this.waitingForValueDeferredPromise.isSettled) {
+            this.waitingForValueDeferredPromise = new DeferredPromise();
+            super.setValue(this.waitingForValueDeferredPromise.promise, check.strictEquals);
         }
 
         newPromise
@@ -118,26 +122,39 @@ export class AsyncObservable<Value> extends AnyObservable {
         return true;
     }
 
-    protected resolveValue(value: ExcludeNoUpdate<Value>): boolean {
-        if (
-            value === noUpdate ||
-            !super.setValue(value, this.value instanceof Promise ? isStrictEqual : undefined)
-        ) {
+    /**
+     * Internally updates the current value when a promise value has been resolved or a non-promise
+     * value is given.
+     */
+    protected resolveValue(value: AllowNoUpdate<Value>): boolean {
+        if (!isNotNoUpdate(value)) {
+            value = this.lastResolvedValue as ExcludeNoUpdate<Value>;
+        }
+        const setResult =
+            this.value instanceof Promise
+                ? super.setValue(value, check.strictEquals)
+                : super.setValue(value);
+
+        if (!setResult) {
             return false;
         }
         (this as Writable<typeof this>).lastResolvedValue = value as typeof this.lastResolvedValue;
 
         this.lastSetId = randomString();
-        if (!this.waitingForValueDeferredPromise.isSettled()) {
-            this.waitingForValueDeferredPromise.resolve(value);
+        if (!this.waitingForValueDeferredPromise.isSettled) {
+            this.waitingForValueDeferredPromise.resolve(value as ExcludeNoUpdate<Value>);
         }
         this.dispatch(new ObservableValueResolveEvent({detail: value}));
         return true;
     }
 
+    /**
+     * Internally updates the current value when a promise value has been rejected or an error value
+     * is given.
+     */
     protected rejectValue(error: Error) {
         this.waitingForValueDeferredPromise.reject(error);
-        super.setValue(error, isStrictEqual);
+        super.setValue(error, check.strictEquals);
         this.dispatch(new ObservableValueErrorEvent({detail: error}));
     }
 
@@ -152,7 +169,7 @@ export class AsyncObservable<Value> extends AnyObservable {
      * @returns `true` if the new value was set, `false` otherwise.
      */
     public override setValue(
-        value: AllowNoUpdate<Error | MaybePromise<ExcludeNoUpdate<Value>>>,
+        value: AllowNoUpdate<Error | MaybePromise<AllowNoUpdate<Value>>>,
     ): boolean {
         try {
             if (value instanceof Promise) {
@@ -160,10 +177,10 @@ export class AsyncObservable<Value> extends AnyObservable {
             } else if (value instanceof Error) {
                 this.rejectValue(value);
                 return true;
-            } else if (!isNotNoUpdate(value)) {
-                return false;
-            } else {
+            } else if (isNotNoUpdate(value)) {
                 return this.resolveValue(value);
+            } else {
+                return false;
             }
         } catch (error) {
             this.rejectValue(ensureError(error));

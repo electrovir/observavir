@@ -1,24 +1,21 @@
-import {
-    arePropsStrictEqual,
-    getRunTimeType,
-    isRunTimeType,
-    isStrictEqual,
-} from 'run-time-assertions';
+import {check, checkCustomDeepQuality} from '@augment-vir/assert';
+
+// use checkCustomDeepEquality
 
 /**
- * Custom equality checker that:
+ * A custom deep equality checker that:
  *
- * - Compares properties of objects
  * - Strictly compares primitives
  * - Considers all functions as equal
+ *
+ * @category Internal
  */
 export function observableEqualityCheck(a: unknown, b: unknown): boolean {
-    return arePropsStrictEqual(a, b, propCheckWithFunctionEquality);
-}
-
-function propCheckWithFunctionEquality(a: unknown, b: unknown): boolean {
-    if (getRunTimeType(a) === getRunTimeType(b) && isRunTimeType(a, 'function')) {
-        return true;
-    }
-    return isStrictEqual(a, b);
+    return checkCustomDeepQuality(a, b, (c, d) => {
+        if (check.isFunction(c) && check.isFunction(d)) {
+            return true;
+        } else {
+            return check.strictEquals(c, d);
+        }
+    });
 }

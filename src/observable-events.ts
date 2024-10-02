@@ -8,7 +8,7 @@ import {defineTypedCustomEvent, defineTypedEvent} from 'typed-event-target';
  * Observables abstract this event away, you can simply call `.listen()` to listen to an
  * observable's value rather than listening to this specific event.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableValueUpdateEvent extends defineTypedCustomEvent<unknown>()(
     'observable-value-update',
@@ -17,7 +17,7 @@ export class ObservableValueUpdateEvent extends defineTypedCustomEvent<unknown>(
 /**
  * This event is emitted from async observables when their value is resolved.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableValueResolveEvent extends defineTypedCustomEvent<unknown>()(
     'observable-value-resolve',
@@ -26,7 +26,7 @@ export class ObservableValueResolveEvent extends defineTypedCustomEvent<unknown>
 /**
  * This event is emitted from async observables when awaiting their value throws an error.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableValueErrorEvent extends defineTypedCustomEvent<Error>()(
     'observable-value-error',
@@ -35,21 +35,21 @@ export class ObservableValueErrorEvent extends defineTypedCustomEvent<Error>()(
 /**
  * This event is emitted from observables when they are destroyed.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableDestroyEvent extends defineTypedEvent('observable-destroy') {}
 
 /**
  * This event is emitted from callback observables when their callback is called.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableCallbackCallEvent extends defineTypedEvent('observable-callback-call') {}
 
 /**
  * This event is emitted from callback observables when their params are updated.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableParamsUpdateEvent extends defineTypedCustomEvent<unknown>()(
     'observable-params-update',
@@ -58,7 +58,7 @@ export class ObservableParamsUpdateEvent extends defineTypedCustomEvent<unknown>
 /**
  * This event is emitted from interval observables when the interval is run.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableIntervalRunEvent extends defineTypedCustomEvent</* The interval's params. */ unknown>()(
     'observable-interval-run',
@@ -68,7 +68,7 @@ export class ObservableIntervalRunEvent extends defineTypedCustomEvent</* The in
  * This event is emitted from interval observables when the interval is skipped for whatever reason.
  * The event detail will contain information about why the interval was skipped.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableIntervalSkipEvent extends defineTypedCustomEvent<
     /* Reasons for skipping. */ Record<string, boolean>
@@ -78,13 +78,17 @@ export class ObservableIntervalSkipEvent extends defineTypedCustomEvent<
  * This event is emitted from interval observables when and update or value set is blocked due to
  * rate limiting.
  *
- * @category Events
+ * @category Event
  */
 export class ObservableIntervalRateLimitedEvent extends defineTypedCustomEvent</* The last set time. */ FullDate>()(
     'observable-interval-rate-limited',
 ) {}
 
-/** All possible observable event constructors in a single array. */
+/**
+ * All possible observable event constructors in a single array.
+ *
+ * @category Event
+ */
 export const allObservableEvents = [
     ObservableValueUpdateEvent,
     ObservableValueResolveEvent,
@@ -97,7 +101,15 @@ export const allObservableEvents = [
     ObservableIntervalRateLimitedEvent,
 ] as const;
 
-/** A union of all possible observable event class types. */
+/**
+ * A union of all possible observable event class types.
+ *
+ * @category Event
+ */
 export type ObservableEvents = InstanceType<ArrayElement<typeof allObservableEvents>>;
-/** A union of all possible event type strings from each observable event class. */
+/**
+ * A union of all possible event type strings from each observable event class.
+ *
+ * @category Event
+ */
 export type ObservableEventTypes = ObservableEvents['type'];

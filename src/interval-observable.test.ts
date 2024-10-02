@@ -1,10 +1,9 @@
-import {itCases} from '@augment-vir/browser-testing';
+import {assert, check} from '@augment-vir/assert';
 import {MaybePromise, getOrSet, wait} from '@augment-vir/common';
-import {assert} from '@open-wc/testing';
-import {isStrictEqual} from 'run-time-assertions';
-import {IntervalObservable, IntervalObservableInit} from './interval-observable';
-import {noUpdate} from './no-update';
-import {ObservableEventTypes, allObservableEvents} from './observable-events';
+import {describe, it, itCases} from '@augment-vir/test';
+import {IntervalObservable, IntervalObservableInit} from './interval-observable.js';
+import {noUpdate} from './no-update.js';
+import {ObservableEventTypes, allObservableEvents} from './observable-events.js';
 
 describe(IntervalObservable.name, () => {
     async function testIntervalObservable(
@@ -16,12 +15,12 @@ describe(IntervalObservable.name, () => {
         const equalityChecks: [any, any][] = [];
 
         const instance = new IntervalObservable({
-            equalityCheck(a, b) {
+            equalityCheck(a: any, b: any) {
                 equalityChecks.push([
                     a,
                     b,
                 ]);
-                return isStrictEqual(a, b);
+                return check.strictEquals(a, b);
             },
             ...init,
             startPaused: true,
@@ -62,7 +61,7 @@ describe(IntervalObservable.name, () => {
                     instance.update(2);
                     instance.update(3);
                     instance.setValue('fake value');
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                     instance.update(4);
                 },
                 {
@@ -126,7 +125,7 @@ describe(IntervalObservable.name, () => {
             it: 'automatically updates',
             inputs: [
                 async () => {
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                 },
                 {
                     defaultParams: 2,
@@ -165,9 +164,9 @@ describe(IntervalObservable.name, () => {
             it: 'pauses and resumes updates',
             inputs: [
                 async (instance) => {
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                     instance.pauseInterval();
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                     instance.resumeInterval();
                 },
                 {
@@ -214,7 +213,7 @@ describe(IntervalObservable.name, () => {
             inputs: [
                 async (instance) => {
                     assert.isFalse(instance.resumeInterval());
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                 },
                 {
                     defaultParams: 2,
@@ -254,7 +253,7 @@ describe(IntervalObservable.name, () => {
             inputs: [
                 async (instance) => {
                     assert.isFalse(instance.pauseInterval());
-                    await wait(4500);
+                    await wait({seconds: 4.5});
                 },
                 {
                     defaultParams: 2,
@@ -274,7 +273,7 @@ describe(IntervalObservable.name, () => {
             it: 'does not update for noUpdate',
             inputs: [
                 async () => {
-                    await wait(1000);
+                    await wait({seconds: 1});
                 },
                 {
                     defaultParams: undefined,
@@ -309,14 +308,14 @@ describe(IntervalObservable.name, () => {
             },
         });
 
-        await wait(1000);
+        await wait({seconds: 1});
 
         assert.isAbove(updateCount, 2);
 
         instance.destroy();
         const updateCountAfterDestroy = updateCount;
 
-        await wait(1000);
+        await wait({seconds: 1});
 
         assert.isBelow(updateCount, updateCountAfterDestroy + 5);
     });

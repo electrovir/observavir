@@ -1,8 +1,8 @@
+import {assert, check} from '@augment-vir/assert';
 import {randomString} from '@augment-vir/common';
-import {assert} from '@open-wc/testing';
-import {assertTypeOf, isLooseEqual} from 'run-time-assertions';
-import {noUpdate} from './no-update';
-import {Observable} from './observable';
+import {describe, it} from '@augment-vir/test';
+import {noUpdate} from './no-update.js';
+import {Observable} from './observable.js';
 
 describe(Observable.name, () => {
     it('calls listen when value updates', () => {
@@ -18,7 +18,7 @@ describe(Observable.name, () => {
         instance.setValue('different string');
         instance.setValue('hi');
 
-        assert.deepStrictEqual(results, [
+        assert.deepEquals(results, [
             'different string',
             'hi',
         ]);
@@ -39,7 +39,7 @@ describe(Observable.name, () => {
 
         instance.setValue('hi');
 
-        assert.deepStrictEqual(results, [
+        assert.deepEquals(results, [
             'different string',
         ]);
     });
@@ -61,7 +61,7 @@ describe(Observable.name, () => {
 
         instance.setValue('hi');
 
-        assert.deepStrictEqual(results, [
+        assert.deepEquals(results, [
             'different string',
         ]);
     });
@@ -70,13 +70,13 @@ describe(Observable.name, () => {
         const instance = new Observable({defaultValue: 'hi'});
 
         instance.setValue(noUpdate);
-        assert.strictEqual(instance.value, 'hi');
+        assert.strictEquals(instance.value, 'hi');
     });
 
     it('supports different equality checks', () => {
         const results: string[] = [];
 
-        const instance = new Observable({defaultValue: '5', equalityCheck: isLooseEqual});
+        const instance = new Observable({defaultValue: '5', equalityCheck: check.looseEquals});
 
         instance.listen(false, (newValue: string) => {
             results.push(newValue);
@@ -87,24 +87,25 @@ describe(Observable.name, () => {
 
         instance.setValue('hi');
 
-        assert.deepStrictEqual(results, [
+        assert.deepEquals(results as unknown[], [
             42,
             'hi',
         ]);
     });
 
     it('has proper types', () => {
-        const instance = new Observable({defaultValue: 'hi', equalityCheck: isLooseEqual});
+        const instance = new Observable({defaultValue: 'hi', equalityCheck: check.looseEquals});
 
         instance.setValue('different string');
         // @ts-expect-error: wrong value type
         instance.setValue(42);
 
         // @ts-expect-error: wrong type for equality check callback
+        // eslint-disable-next-line sonarjs/constructor-for-side-effects
         new Observable({defaultValue: 'hi', equalityCheck: (a: number, b: number) => true});
 
         instance.listen(false, (value) => {
-            assertTypeOf(value).toEqualTypeOf<string>();
+            assert.tsType(value).equals<string>();
         });
     });
 
@@ -118,7 +119,7 @@ describe(Observable.name, () => {
             results.push(value);
         });
 
-        assert.deepStrictEqual(results, [defaultValue]);
-        assert.strictEqual(instance.getListenerCount(), 1);
+        assert.deepEquals(results, [defaultValue]);
+        assert.strictEquals(instance.getListenerCount(), 1);
     });
 });

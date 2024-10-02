@@ -5,26 +5,30 @@ import {
     ListenTarget,
     RemoveListenerCallback,
     TypedEventListenerWithRemoval,
+    type ExtractEventByType,
+    type ExtractEventTypes,
 } from 'typed-event-target';
-import {
-    ExtractEventByType,
-    ExtractEventTypes,
-} from 'typed-event-target/dist/esm/events/event-types';
-import {EqualityCheck} from './equality-check';
-import {noUpdate} from './no-update';
-import {ObservableBase} from './observable-base';
+import {EqualityCheck} from './equality-check.js';
+import {noUpdate} from './no-update.js';
+import {ObservableBase} from './observable-base.js';
 import {
     ObservableDestroyEvent,
     ObservableEvents,
     ObservableValueUpdateEvent,
-} from './observable-events';
+} from './observable-events.js';
 
-/** A callback for listening to observable value changes. */
+/**
+ * A callback for listening to observable value changes.
+ *
+ * @category Type
+ */
 export type ObservableListener<Value> = (value: Value) => MaybePromise<void>;
 
 /**
  * A non-type-safe observable implementation meant as a base for more advanced, type safe
  * observables like `Observable` or `AsyncObservable`, etc.
+ *
+ * @category Internal
  */
 export abstract class AnyObservable implements ObservableBase {
     private listenTarget = new ListenTarget<ObservableEvents>();
@@ -87,18 +91,23 @@ export abstract class AnyObservable implements ObservableBase {
      * @returns `true` if the new value was set, `false` otherwise.
      */
     public setValue(
-        newValue: any,
-        /**
-         * Omit to use internal equality check. Set undefined to bypass equality check. Set to an
-         * equality check function to use it in place of the internal equality check.
-         */
-        equalityCheck: EqualityCheck<any> | undefined = this.equalityCheck,
+        ...args: [
+            newValue: any,
+            /**
+             * Omit to use internal equality check. Set `undefined` to bypass equality check. Set to
+             * an equality check function to use it in place of the internal equality check.
+             */
+            equalityCheck?: EqualityCheck<any> | undefined,
+        ]
     ): boolean {
+        const newValue = args[0];
+
         if (newValue === noUpdate) {
             return false;
         }
+        const equalityCheck = args.length === 2 ? args[1] : this.equalityCheck;
 
-        if (!equalityCheck || !equalityCheck(this.value, newValue)) {
+        if (!equalityCheck?.(this.value, newValue)) {
             (this as Writable<typeof this>).value = newValue;
             this.listenTarget.dispatch(new ObservableValueUpdateEvent({detail: newValue}));
             return true;
@@ -124,7 +133,7 @@ export abstract class AnyObservable implements ObservableBase {
         this.listenerMap.set(callback, mapped);
 
         if (fireImmediately) {
-            callback(this.value);
+            void callback(this.value);
         }
 
         return this.listenTarget.listen(ObservableValueUpdateEvent, mapped);

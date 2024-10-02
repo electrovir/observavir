@@ -1,24 +1,10 @@
-import {itCases} from '@augment-vir/browser-testing';
-import {
-    MaybePromise,
-    createDeferredPromiseWrapper,
-    getOrSet,
-    randomString,
-    wait,
-    waitUntilTruthy,
-} from '@augment-vir/common';
-import {assert} from '@open-wc/testing';
-import {
-    assertInstanceOf,
-    assertRunTimeType,
-    assertStrictEqual,
-    assertTypeOf,
-    isStrictEqual,
-} from 'run-time-assertions';
-import {AsyncValue} from './async-observable';
-import {CallbackObservable, CallbackObservableInit} from './callback-observable';
-import {noUpdate} from './no-update';
-import {ObservableEventTypes, allObservableEvents} from './observable-events';
+import {assert, check, waitUntil} from '@augment-vir/assert';
+import {DeferredPromise, MaybePromise, getOrSet, randomString, wait} from '@augment-vir/common';
+import {describe, it, itCases} from '@augment-vir/test';
+import {AsyncValue} from './async-observable.js';
+import {CallbackObservable, CallbackObservableInit} from './callback-observable.js';
+import {noUpdate} from './no-update.js';
+import {ObservableEventTypes, allObservableEvents} from './observable-events.js';
 
 describe(CallbackObservable.name, () => {
     it('has correct types', () => {
@@ -31,28 +17,28 @@ describe(CallbackObservable.name, () => {
 
         instance.equalityCheck = (a, b) => {
             /** The equality check must account for both params and values. */
-            assertTypeOf(a).toEqualTypeOf<string | {value1: string; value2: number}>();
-            assertTypeOf(b).toEqualTypeOf<string | {value1: string; value2: number}>();
-            return isStrictEqual(a, b);
+            assert.tsType(a).equals<string | {value1: string; value2: number}>();
+            assert.tsType(b).equals<string | {value1: string; value2: number}>();
+            return check.strictEquals(a, b);
         };
 
         // @ts-expect-error: update inputs should be the params
         instance.update('hi');
-        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
-        assert.instanceOf(instance.value, Error);
+        assert.tsType(instance.value).equals<AsyncValue<string>>();
+        assert.instanceOf<any>(instance.value, Error);
 
         instance.update({
             value1: 'hi ',
             value2: 3,
         });
 
-        assert.strictEqual<unknown>(instance.value, 'hi hi hi ');
+        assert.strictEquals(instance.value, 'hi hi hi ' as string);
 
         /** Can be called without params. */
         instance.forceUpdate();
 
         instance.setValue('hi');
-        assert.strictEqual<unknown>(instance.value, 'hi');
+        assert.strictEquals(instance.value, 'hi');
     });
 
     async function testCallbackObservable(
@@ -69,7 +55,7 @@ describe(CallbackObservable.name, () => {
                     a,
                     b,
                 ]);
-                return isStrictEqual(a, b);
+                return check.strictEquals(a, b);
             },
             ...init,
         });
@@ -100,7 +86,9 @@ describe(CallbackObservable.name, () => {
                     instance.forceUpdate();
                 },
             ],
-            throws: 'updateCallback was never set',
+            throws: {
+                matchMessage: 'updateCallback was never set',
+            },
         },
         {
             it: 'errors on updateTrigger without updateCallback',
@@ -109,7 +97,9 @@ describe(CallbackObservable.name, () => {
                     instance.update('something');
                 },
             ],
-            throws: 'updateCallback was never set',
+            throws: {
+                matchMessage: 'updateCallback was never set',
+            },
         },
         {
             it: 'errors on forceUpdate without params',
@@ -123,7 +113,9 @@ describe(CallbackObservable.name, () => {
                     },
                 },
             ],
-            throws: 'params were never set',
+            throws: {
+                matchMessage: 'params were never set',
+            },
         },
         {
             it: 'updates on updateTrigger',
@@ -152,7 +144,7 @@ describe(CallbackObservable.name, () => {
                 (instance) => {
                     assert.isUndefined(instance.lastParams);
                     instance.setParams('hi');
-                    assert.strictEqual(instance.lastParams, 'hi');
+                    assert.strictEquals(instance.lastParams as unknown, 'hi');
                 },
                 {
                     updateCallback(param: string) {
@@ -320,11 +312,11 @@ describe(CallbackObservable.name, () => {
             it: 'handles an async updateCallback',
             inputs: [
                 async (instance) => {
-                    const deferred = createDeferredPromiseWrapper<string>();
+                    const deferred = new DeferredPromise<string>();
                     instance.update(deferred.promise);
 
-                    assertInstanceOf(instance.value, Promise);
-                    assertStrictEqual(instance.lastResolvedValue, 'init');
+                    assert.instanceOf(instance.value, Promise);
+                    assert.strictEquals(instance.lastResolvedValue, 'init');
 
                     deferred.resolve('some value');
                     await instance.value;
@@ -358,12 +350,14 @@ describe(CallbackObservable.name, () => {
         {
             it: 'sets an error value if a sync updateCallback fails',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.update('hi');
                 },
                 {
                     defaultValue: 'init',
                     updateCallback(param: string) {
+                        // intentionally test that a non-error can be thrown and handled correctly
+                        // eslint-disable-next-line sonarjs/no-throw-literal, @typescript-eslint/only-throw-error
                         throw 'intentional failure';
                     },
                 },
@@ -388,7 +382,7 @@ describe(CallbackObservable.name, () => {
         {
             it: 'updates params from forceUpdate',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.forceUpdate('hello');
                 },
                 {
@@ -417,7 +411,7 @@ describe(CallbackObservable.name, () => {
         {
             it: 'handles equality check errors',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.update('hello');
                     instance.update('hello');
                 },
@@ -458,7 +452,7 @@ describe(CallbackObservable.name, () => {
         {
             it: 'uses default params',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.forceUpdate();
                 },
                 {
@@ -490,7 +484,7 @@ describe(CallbackObservable.name, () => {
 
         const instance = new CallbackObservable({
             async updateCallback() {
-                await wait(updateDuration.milliseconds);
+                await wait(updateDuration);
                 setTimeout(() => {
                     resolved = true;
                 });
@@ -504,9 +498,9 @@ describe(CallbackObservable.name, () => {
         instance.setValue(42);
 
         assert.isFalse(resolved);
-        await waitUntilTruthy(() => resolved);
-        await wait(updateDuration.milliseconds * 2);
-        assert.strictEqual<unknown>(instance.value, 42);
+        await waitUntil.isTruthy(() => resolved);
+        await wait({milliseconds: updateDuration.milliseconds * 2});
+        assert.strictEquals(instance.value as unknown, 42);
     });
 
     it('ignores function properties', () => {
@@ -523,19 +517,19 @@ describe(CallbackObservable.name, () => {
             b: () => {},
         });
 
-        assert.strictEqual(counter, 1);
-        assert.strictEqual(instance.value, 1);
+        assert.strictEquals(counter, 1);
+        assert.strictEquals(instance.value, 1);
 
         instance.update({
             a: 0,
             b: () => {},
         });
 
-        assert.strictEqual(counter, 1);
-        assert.strictEqual(instance.value, 1);
+        assert.strictEquals(counter, 1);
+        assert.strictEquals(instance.value, 1);
     });
 
-    it('forces an update from forceUpdate', async () => {
+    it('forces an update from forceUpdate', () => {
         const instance = new CallbackObservable({
             updateCallback(input: string) {
                 return randomString();
@@ -545,20 +539,20 @@ describe(CallbackObservable.name, () => {
         const preForceValue = instance.value;
         // does not update with the same input
         instance.update('hi');
-        assert.strictEqual(instance.value, preForceValue);
-        assertRunTimeType(preForceValue, 'string');
+        assert.strictEquals(instance.value, preForceValue);
+        assert.isString(preForceValue);
         instance.forceUpdate();
-        assert.notStrictEqual(instance.value, preForceValue);
+        assert.notStrictEquals(instance.value, preForceValue);
     });
 
-    it('has proper types with noUpdate', async () => {
+    it('has proper types with noUpdate', () => {
         const instance = new CallbackObservable({
             updateCallback(): string | typeof noUpdate {
                 return noUpdate;
             },
         });
 
-        assertTypeOf(instance.lastResolvedValue).toEqualTypeOf<string | undefined>();
-        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
+        assert.tsType(instance.lastResolvedValue).equals<string | undefined>();
+        assert.tsType(instance.value).equals<AsyncValue<string>>();
     });
 });

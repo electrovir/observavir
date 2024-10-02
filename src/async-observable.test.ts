@@ -1,25 +1,14 @@
-import {itCases} from '@augment-vir/browser-testing';
-import {
-    MaybePromise,
-    createDeferredPromiseWrapper,
-    wrapPromiseInTimeout,
-} from '@augment-vir/common';
-import {assert} from '@open-wc/testing';
-import {
-    assertInstanceOf,
-    assertLooseEqual,
-    assertStrictEqual,
-    assertThrows,
-    assertTypeOf,
-    isStrictEqual,
-} from 'run-time-assertions';
-import {AsyncObservable, AsyncObservableInit, AsyncValue} from './async-observable';
+import {assert, check} from '@augment-vir/assert';
+import {DeferredPromise, MaybePromise, wrapPromiseInTimeout} from '@augment-vir/common';
+import {describe, it, itCases} from '@augment-vir/test';
+import {AsyncObservable, AsyncObservableInit, AsyncValue} from './async-observable.js';
+import {noUpdate} from './no-update.js';
 import {
     ObservableDestroyEvent,
     ObservableValueErrorEvent,
     ObservableValueResolveEvent,
     ObservableValueUpdateEvent,
-} from './observable-events';
+} from './observable-events.js';
 
 describe(AsyncObservable.name, () => {
     async function testAsyncObservable(
@@ -40,7 +29,7 @@ describe(AsyncObservable.name, () => {
                     a,
                     b,
                 ]);
-                return isStrictEqual(a, b);
+                return check.strictEquals(a, b);
             },
             ...initValue,
         });
@@ -84,10 +73,10 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 (instance) => {
                     assert.isUndefined(instance.lastResolvedValue);
-                    const deferredPromise1 = createDeferredPromiseWrapper<void>();
+                    const deferredPromise1 = new DeferredPromise<void>();
                     instance.setValue(deferredPromise1.promise);
                     assert.isUndefined(instance.lastResolvedValue);
-                    const deferredPromise2 = createDeferredPromiseWrapper<void>();
+                    const deferredPromise2 = new DeferredPromise<void>();
                     instance.setValue(deferredPromise2.promise);
                     assert.isUndefined(instance.lastResolvedValue);
                     deferredPromise2.resolve();
@@ -109,15 +98,15 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const waitingForFirstValue = instance.value;
-                    assertInstanceOf(waitingForFirstValue, Promise);
-                    const deferredPromise1 = createDeferredPromiseWrapper<void>();
+                    assert.instanceOf(waitingForFirstValue, Promise);
+                    const deferredPromise1 = new DeferredPromise<void>();
                     instance.setValue(deferredPromise1.promise);
-                    const deferredPromise2 = createDeferredPromiseWrapper<void>();
+                    const deferredPromise2 = new DeferredPromise<void>();
                     instance.setValue(deferredPromise2.promise);
                     deferredPromise2.resolve();
                     deferredPromise1.resolve();
-                    assertLooseEqual(await waitingForFirstValue, undefined);
-                    assertLooseEqual(instance.lastResolvedValue, undefined);
+                    assert.looseEquals(await waitingForFirstValue, undefined);
+                    assert.looseEquals(instance.lastResolvedValue, undefined);
                 },
             ],
             expect: {
@@ -135,10 +124,10 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const waitingForFirstValue = instance.value;
-                    assertInstanceOf(waitingForFirstValue, Promise);
+                    assert.instanceOf(waitingForFirstValue, Promise);
                     instance.setValue('hello there');
-                    assertStrictEqual(await waitingForFirstValue, 'hello there');
-                    assertStrictEqual(instance.lastResolvedValue, 'hello there');
+                    assert.strictEquals(await waitingForFirstValue, 'hello there');
+                    assert.strictEquals(instance.lastResolvedValue, 'hello there');
                 },
             ],
             expect: {
@@ -154,12 +143,12 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const waitingForFirstValue = instance.value;
-                    assertInstanceOf(waitingForFirstValue, Promise);
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    assert.instanceOf(waitingForFirstValue, Promise);
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
                     deferredWrapper.resolve('hello there');
-                    assertStrictEqual(await waitingForFirstValue, 'hello there');
-                    assertStrictEqual(instance.lastResolvedValue, 'hello there');
+                    assert.strictEquals(await waitingForFirstValue, 'hello there');
+                    assert.strictEquals(instance.lastResolvedValue, 'hello there');
                 },
             ],
             expect: {
@@ -175,13 +164,13 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const initialValuePromise = instance.value;
-                    assertInstanceOf(initialValuePromise, Promise);
+                    assert.instanceOf(initialValuePromise, Promise);
                     instance.setValue('first value');
-                    assert.strictEqual(
-                        await wrapPromiseInTimeout(100, initialValuePromise),
+                    assert.strictEquals(
+                        await wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
                         'first value',
                     );
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
 
                     deferredWrapper.resolve('second value');
@@ -207,13 +196,13 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const initialValuePromise = instance.value;
-                    assertInstanceOf(initialValuePromise, Promise);
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    assert.instanceOf(initialValuePromise, Promise);
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
 
                     deferredWrapper.resolve('here is a value');
-                    assert.strictEqual(
-                        await wrapPromiseInTimeout(100, initialValuePromise),
+                    assert.strictEquals(
+                        await wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
                         'here is a value',
                     );
                 },
@@ -235,13 +224,15 @@ describe(AsyncObservable.name, () => {
             inputs: [
                 async (instance) => {
                     const initialValuePromise = instance.value;
-                    assertInstanceOf(initialValuePromise, Promise);
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    assert.instanceOf(initialValuePromise, Promise);
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
 
                     deferredWrapper.reject('FAILURE');
 
-                    await assertThrows(() => wrapPromiseInTimeout(100, initialValuePromise));
+                    await assert.throws(() =>
+                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
+                    );
                 },
             ],
             expect: {
@@ -257,7 +248,7 @@ describe(AsyncObservable.name, () => {
         {
             it: 'checks for equality on resolved values',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.setValue('hello there');
                     instance.setValue('hello there');
                     instance.setValue('another value');
@@ -289,9 +280,9 @@ describe(AsyncObservable.name, () => {
         {
             it: 'does not set the same promise',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.setValue('first value');
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
                     instance.setValue(deferredWrapper.promise);
                     instance.setValue(deferredWrapper.promise);
@@ -319,12 +310,12 @@ describe(AsyncObservable.name, () => {
         {
             it: 'sets an initial value',
             inputs: [
-                async (instance) => {
-                    assert.strictEqual(instance.value, 'init value');
-                    assert.strictEqual(instance.lastResolvedValue, 'init value');
+                (instance) => {
+                    assert.strictEquals(instance.value, 'init value');
+                    assert.strictEquals(instance.lastResolvedValue, 'init value' as string);
                     instance.setValue('second value');
-                    assert.strictEqual(instance.lastResolvedValue, 'second value');
-                    const deferredWrapper = createDeferredPromiseWrapper<string>();
+                    assert.strictEquals(instance.lastResolvedValue, 'second value');
+                    const deferredWrapper = new DeferredPromise<string>();
                     instance.setValue(deferredWrapper.promise);
 
                     deferredWrapper.resolve('third value');
@@ -356,7 +347,7 @@ describe(AsyncObservable.name, () => {
         {
             it: 'handles equalityCheck errors',
             inputs: [
-                async (instance) => {
+                (instance) => {
                     instance.setValue('second value');
                 },
                 {
@@ -380,6 +371,48 @@ describe(AsyncObservable.name, () => {
         },
     ]);
 
+    it('ignores noUpdate inside a promise', async () => {
+        const instance = new AsyncObservable<string>();
+
+        const valueUpdates: string[] = [];
+
+        instance.listen(false, (newValue) => {
+            valueUpdates.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue(noUpdate);
+        instance.setValue('hi2');
+        instance.setValue(Promise.resolve(noUpdate));
+        await instance.value;
+        instance.setValue('hi3');
+
+        assert.deepEquals(valueUpdates.slice(0, 2), [
+            'hi',
+            'hi2',
+        ]);
+        assert.instanceOf(valueUpdates[2], Promise);
+        assert.deepEquals(valueUpdates.slice(3), [
+            'hi2',
+            'hi3',
+        ]);
+        assert.isLengthExactly(valueUpdates, 5);
+
+        /**
+         * Output should look like this:
+         *
+         * ```ts
+         * const valueUpdates = [
+         *     'hi',
+         *     'hi2',
+         *     <Promise>,
+         *     'hi2',
+         *     'hi3',
+         * ];
+         * ```
+         */
+    });
+
     it('defaults to strict equal', () => {
         const instance = new AsyncObservable<string>();
 
@@ -392,22 +425,46 @@ describe(AsyncObservable.name, () => {
         instance.setValue('hi');
         instance.setValue('hi');
 
-        assert.deepStrictEqual(valueUpdates, ['hi']);
+        assert.deepEquals(valueUpdates, ['hi']);
+    });
+
+    it('supports custom equality checking', () => {
+        const instance = new AsyncObservable<string>({
+            equalityCheck() {
+                return false;
+            },
+        });
+
+        const valueUpdates: string[] = [];
+
+        instance.listen(false, (newValue) => {
+            valueUpdates.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue('hi');
+        instance.setValue('hi');
+
+        assert.deepEquals(valueUpdates, [
+            'hi',
+            'hi',
+            'hi',
+        ]);
     });
 
     it('has proper types', () => {
         const instance = new AsyncObservable({
             defaultValue: 'hello',
             equalityCheck(a, b) {
-                assertTypeOf(a).toEqualTypeOf<string>();
-                assertTypeOf(b).toEqualTypeOf<string>();
+                assert.tsType(a).equals<string>();
+                assert.tsType(b).equals<string>();
 
                 return a === b;
             },
         });
 
-        assertTypeOf(instance.value).toEqualTypeOf<AsyncValue<string>>();
-        assertTypeOf(instance.lastResolvedValue).toEqualTypeOf<string | undefined>();
+        assert.tsType(instance.value).equals<AsyncValue<string>>();
+        assert.tsType(instance.lastResolvedValue).equals<string | undefined>();
 
         instance.setValue('hi');
         // @ts-expect-error input wrong type
@@ -418,11 +475,11 @@ describe(AsyncObservable.name, () => {
         instance.setValue(Promise.resolve(32));
 
         instance.listen(false, (value) => {
-            assertTypeOf(value).toEqualTypeOf<string>();
+            assert.tsType(value).equals<string>();
         });
 
         instance.listenToEvent(ObservableValueResolveEvent, (event) => {
-            assertTypeOf(event.detail).toBeUnknown();
+            assert.tsType(event.detail).equals<unknown>();
         });
     });
 });

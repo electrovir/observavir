@@ -1,7 +1,6 @@
-import {Overwrite, PartialAndUndefined, wrapInTry} from '@augment-vir/common';
+import {Overwrite, PartialWithUndefined, wrapInTry} from '@augment-vir/common';
 import {
     AnyDuration,
-    DurationUnit,
     FullDate,
     calculateRelativeDate,
     convertDuration,
@@ -9,18 +8,22 @@ import {
     isDateAfter,
 } from 'date-vir';
 import {Writable} from 'type-fest';
-import {AsyncObservable} from './async-observable';
-import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable';
+import {AsyncObservable} from './async-observable.js';
+import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable.js';
 import {
     ObservableIntervalRateLimitedEvent,
     ObservableIntervalRunEvent,
     ObservableIntervalSkipEvent,
-} from './observable-events';
+} from './observable-events.js';
 
-/** Constructor input for the interval observable class. */
+/**
+ * Constructor input for {@link IntervalObservable}.
+ *
+ * @category Type
+ */
 export type IntervalObservableInit<Value, Params> = Overwrite<
     CallbackObservableInit<Value, Params>,
-    PartialAndUndefined<{
+    PartialWithUndefined<{
         /** The duration between automatic interval updates. Multiple duration units can be set. */
         intervalDuration: AnyDuration;
         /**
@@ -46,10 +49,10 @@ export type IntervalObservableInit<Value, Params> = Overwrite<
 >;
 
 /**
- * A variation of the callback observable that automatically calls the callback to update itself at
- * a regular interval.
+ * A variation of {@link CallbackObservable} that automatically calls the callback to update itself
+ * at a regular interval.
  *
- * @category Main
+ * @category Observable
  */
 export class IntervalObservable<Value, Params> extends CallbackObservable<Value, Params> {
     /**
@@ -84,10 +87,10 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
         }
     }
 
+    /** Sets a timeout and runts the update once its finished. */
     protected setInterval() {
         const duration =
-            this.intervalDuration &&
-            convertDuration(this.intervalDuration, DurationUnit.Milliseconds);
+            this.intervalDuration && convertDuration(this.intervalDuration, {milliseconds: true});
 
         if (!duration) {
             const reasons = {hasInterval: false};
@@ -102,12 +105,12 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
 
         const timeoutId = globalThis.setTimeout(() => {
             /** Skip the interval if it's no longer the current interval. */
-            /* c8 ignore next 3: covering an edge case potential race condition */
+            /* node:coverage ignore next 3: covering an edge case potential race condition */
             if (this.currentTimeoutId !== timeoutId) {
                 return;
             }
 
-            /* c8 ignore next 6 edge case covering */
+            /* node:coverage ignore next 6: edge case covering */
             try {
                 this.runInterval();
             } catch (error) {
@@ -128,7 +131,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
 
         const reasons = {hasCallback, hasParams};
 
-        /* c8 ignore next 5: just covering a potential edge case */
+        /* node:coverage ignore next 5: just covering a potential edge case */
         wrapInTry(() => this.setInterval(), {
             handleError(error) {
                 console.error(error);
@@ -151,16 +154,16 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
      *   `false`.
      */
     protected isRateLimited(): boolean {
-        if (this.rateLimit && this.lastSetTime) {
-            if (
-                !isDateAfter({
-                    fullDate: getNowInUserTimezone(),
-                    relativeTo: calculateRelativeDate(this.lastSetTime, this.rateLimit),
-                })
-            ) {
-                this.dispatch(new ObservableIntervalRateLimitedEvent({detail: this.lastSetTime}));
-                return true;
-            }
+        if (
+            this.rateLimit &&
+            this.lastSetTime &&
+            !isDateAfter({
+                fullDate: getNowInUserTimezone(),
+                relativeTo: calculateRelativeDate(this.lastSetTime, this.rateLimit),
+            })
+        ) {
+            this.dispatch(new ObservableIntervalRateLimitedEvent({detail: this.lastSetTime}));
+            return true;
         }
 
         return false;
@@ -225,7 +228,7 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
         if (this.currentTimeoutId == undefined) {
             return false;
         } else {
-            /* c8 ignore next 5: this is just to cover clearTimeout potentially freaking out */
+            /* node:coverage ignore next 5: this is just to cover clearTimeout potentially freaking out */
             wrapInTry(() => globalThis.clearTimeout(this.currentTimeoutId), {
                 handleError(error) {
                     console.error(error);
