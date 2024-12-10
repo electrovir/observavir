@@ -357,7 +357,7 @@ describe(CallbackObservable.name, () => {
                     defaultValue: 'init',
                     updateCallback(param: string) {
                         // intentionally test that a non-error can be thrown and handled correctly
-                        // eslint-disable-next-line sonarjs/no-throw-literal, @typescript-eslint/only-throw-error
+                        // eslint-disable-next-line @typescript-eslint/only-throw-error
                         throw 'intentional failure';
                     },
                 },
