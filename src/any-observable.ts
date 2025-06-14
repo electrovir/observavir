@@ -22,7 +22,14 @@ import {
  *
  * @category Internal
  */
-export type ObservableListener<Value> = (value: Value) => MaybePromise<void>;
+export type ObservableListener<Value> = (
+    newValue: Value,
+    /**
+     * `oldValue` will be undefined the firs time the listener is called, because in that case there
+     * is only the present value, no past value.
+     */
+    oldValue: Value | undefined,
+) => MaybePromise<void>;
 
 /**
  * A non-type-safe observable implementation meant as a base for more advanced, type safe
@@ -108,8 +115,16 @@ export abstract class AnyObservable implements ObservableBase {
         const equalityCheck = args.length === 2 ? args[1] : this.equalityCheck;
 
         if (!equalityCheck?.(this.value, newValue)) {
+            const oldValue = this.value;
             (this as Writable<typeof this>).value = newValue;
-            this.listenTarget.dispatch(new ObservableValueUpdateEvent({detail: newValue}));
+            this.listenTarget.dispatch(
+                new ObservableValueUpdateEvent({
+                    detail: [
+                        newValue,
+                        oldValue,
+                    ],
+                }),
+            );
             return true;
         }
 
@@ -128,12 +143,12 @@ export abstract class AnyObservable implements ObservableBase {
         callback: ObservableListener<any>,
     ): RemoveListenerCallback {
         const mapped = (event: ObservableValueUpdateEvent) => {
-            return callback(event.detail);
+            return callback(...event.detail);
         };
         this.listenerMap.set(callback, mapped);
 
         if (fireImmediately) {
-            void callback(this.value);
+            void callback(this.value, undefined);
         }
 
         return this.listenTarget.listen(ObservableValueUpdateEvent, mapped);

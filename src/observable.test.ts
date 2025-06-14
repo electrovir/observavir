@@ -93,6 +93,47 @@ describe(Observable.name, () => {
         ]);
     });
 
+    it('fires with new and old values', () => {
+        const results: {newValue: string; oldValue: string | undefined}[] = [];
+
+        const instance = new Observable({defaultValue: '5', equalityCheck: check.looseEquals});
+
+        instance.listen(false, (newValue, oldValue) => {
+            results.push({newValue, oldValue});
+        });
+
+        instance.setValue(5 as unknown as string);
+        instance.setValue(42 as unknown as string);
+
+        instance.setValue('hi');
+
+        assert.deepEquals(results as unknown[], [
+            {newValue: 42, oldValue: '5'},
+            {newValue: 'hi', oldValue: 42},
+        ]);
+    });
+
+    it('old values are undefined on initial fire', () => {
+        const results: {newValue: string; oldValue: string | undefined}[] = [];
+
+        const instance = new Observable({defaultValue: '5', equalityCheck: check.looseEquals});
+
+        instance.listen(true, (newValue, oldValue) => {
+            results.push({newValue, oldValue});
+        });
+
+        instance.setValue(5 as unknown as string);
+        instance.setValue(42 as unknown as string);
+
+        instance.setValue('hi');
+
+        assert.deepEquals(results as unknown[], [
+            {newValue: '5', oldValue: undefined},
+            {newValue: 42, oldValue: '5'},
+            {newValue: 'hi', oldValue: 42},
+        ]);
+    });
+
     it('has proper types', () => {
         const instance = new Observable({defaultValue: 'hi', equalityCheck: check.looseEquals});
 

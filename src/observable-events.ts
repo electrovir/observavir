@@ -10,7 +10,7 @@ import {defineTypedCustomEvent, defineTypedEvent} from 'typed-event-target';
  *
  * @category Event
  */
-export class ObservableValueUpdateEvent extends defineTypedCustomEvent<unknown>()(
+export class ObservableValueUpdateEvent extends defineTypedCustomEvent<[unknown, unknown]>()(
     'observable-value-update',
 ) {}
 

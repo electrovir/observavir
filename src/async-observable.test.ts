@@ -41,7 +41,7 @@ describe(AsyncObservable.name, () => {
             events.resolved.push(event.detail);
         });
         instance.listenToEvent(ObservableValueUpdateEvent, (event) => {
-            events.valueUpdate.push(String(event.detail));
+            events.valueUpdate.push(String(event.detail[0]));
         });
         instance.listenToEvent(ObservableDestroyEvent, () => {
             events.destroyed.push(true);
@@ -87,7 +87,7 @@ describe(AsyncObservable.name, () => {
                 rejected: [],
                 resolved: [null],
                 valueUpdate: [
-                    'null',
+                    'undefined',
                 ],
                 destroyed: [],
                 equalityChecks: [],
@@ -113,7 +113,7 @@ describe(AsyncObservable.name, () => {
                 rejected: [],
                 resolved: [null],
                 valueUpdate: [
-                    'null',
+                    'undefined',
                 ],
                 destroyed: [],
                 equalityChecks: [],

@@ -3,7 +3,11 @@ import {type MaybePromise, getOrSet, wait} from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
 import {IntervalObservable, type IntervalObservableInit} from './interval-observable.js';
 import {noUpdate} from './no-update.js';
-import {type ObservableEventTypes, allObservableEvents} from './observable-events.js';
+import {
+    type ObservableEventTypes,
+    ObservableValueUpdateEvent,
+    allObservableEvents,
+} from './observable-events.js';
 
 describe(IntervalObservable.name, () => {
     async function testIntervalObservable(
@@ -30,7 +34,13 @@ describe(IntervalObservable.name, () => {
             instance.listenToEvent(observableEvent, (event) => {
                 const eventsByType = getOrSet(events, event.type, () => []);
 
-                eventsByType.push('detail' in event ? String(event.detail) : 'fired');
+                eventsByType.push(
+                    'detail' in event
+                        ? event instanceof ObservableValueUpdateEvent
+                            ? String(event.detail[0])
+                            : String(event.detail)
+                        : 'fired',
+                );
             });
         });
 

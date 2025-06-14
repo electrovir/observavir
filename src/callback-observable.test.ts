@@ -10,7 +10,11 @@ import {describe, it, itCases} from '@augment-vir/test';
 import {type AsyncValue} from './async-observable.js';
 import {CallbackObservable, type CallbackObservableInit} from './callback-observable.js';
 import {noUpdate} from './no-update.js';
-import {type ObservableEventTypes, allObservableEvents} from './observable-events.js';
+import {
+    type ObservableEventTypes,
+    ObservableValueUpdateEvent,
+    allObservableEvents,
+} from './observable-events.js';
 
 describe(CallbackObservable.name, () => {
     it('has correct types', () => {
@@ -70,7 +74,13 @@ describe(CallbackObservable.name, () => {
             instance.listenToEvent(observableEvent, (event) => {
                 const eventsByType = getOrSet(events, event.type, () => []);
 
-                eventsByType.push('detail' in event ? String(event.detail) : 'fired');
+                eventsByType.push(
+                    'detail' in event
+                        ? event instanceof ObservableValueUpdateEvent
+                            ? String(event.detail[0])
+                            : String(event.detail)
+                        : 'fired',
+                );
             });
         });
 
