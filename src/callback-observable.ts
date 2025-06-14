@@ -1,16 +1,16 @@
 import {check} from '@augment-vir/assert';
-import {MaybePromise, ensureError} from '@augment-vir/common';
-import {Simplify} from 'type-fest';
+import {type MaybePromise, ensureError} from '@augment-vir/common';
+import {type Simplify} from 'type-fest';
 import {AsyncObservable} from './async-observable.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';
-import {EqualityCheck} from './equality-check.js';
-import {AllowNoUpdate, ExcludeNoUpdate} from './no-update.js';
+import {type EqualityCheck} from './equality-check.js';
+import {type AllowNoUpdate, type ExcludeNoUpdate} from './no-update.js';
 import {ObservableCallbackCallEvent, ObservableParamsUpdateEvent} from './observable-events.js';
 
 /**
  * Type for update callback provided to {@link CallbackObservable}, used to update its value.
  *
- * @category Type
+ * @category Internal
  */
 export type UpdateCallback<Value, Params> = (
     params: Params,
@@ -20,7 +20,7 @@ export type UpdateCallback<Value, Params> = (
 /**
  * Constructor input for {@link CallbackObservable}.
  *
- * @category Type
+ * @category Internal
  */
 export type CallbackObservableInit<Value, Params = undefined> = Partial<{
     /** Starting value */

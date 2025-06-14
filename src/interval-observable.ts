@@ -1,15 +1,19 @@
-import {Overwrite, PartialWithUndefined, wrapInTry} from '@augment-vir/common';
+import {type Overwrite, type PartialWithUndefined, wrapInTry} from '@augment-vir/common';
 import {
-    AnyDuration,
-    FullDate,
+    type AnyDuration,
+    type FullDate,
     calculateRelativeDate,
     convertDuration,
     getNowInUserTimezone,
     isDateAfter,
 } from 'date-vir';
-import {Writable} from 'type-fest';
-import {AsyncObservable} from './async-observable.js';
-import {CallbackObservable, CallbackObservableInit, UpdateCallback} from './callback-observable.js';
+import {type Writable} from 'type-fest';
+import {type AsyncObservable} from './async-observable.js';
+import {
+    CallbackObservable,
+    type CallbackObservableInit,
+    type UpdateCallback,
+} from './callback-observable.js';
 import {
     ObservableIntervalRateLimitedEvent,
     ObservableIntervalRunEvent,
@@ -19,7 +23,7 @@ import {
 /**
  * Constructor input for {@link IntervalObservable}.
  *
- * @category Type
+ * @category Internal
  */
 export type IntervalObservableInit<Value, Params> = Overwrite<
     CallbackObservableInit<Value, Params>,

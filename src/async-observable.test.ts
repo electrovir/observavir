@@ -1,7 +1,7 @@
 import {assert, check} from '@augment-vir/assert';
-import {DeferredPromise, MaybePromise, wrapPromiseInTimeout} from '@augment-vir/common';
+import {DeferredPromise, type MaybePromise, wrapPromiseInTimeout} from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {AsyncObservable, AsyncObservableInit, AsyncValue} from './async-observable.js';
+import {AsyncObservable, type AsyncObservableInit, type AsyncValue} from './async-observable.js';
 import {noUpdate} from './no-update.js';
 import {
     ObservableDestroyEvent,

@@ -1,6 +1,6 @@
-import {AnyFunction} from '@augment-vir/common';
+import {type AnyFunction} from '@augment-vir/common';
 import {defineShape, isValidShape, unknownShape} from 'object-shape-tester';
-import {RemoveListenerCallback} from 'typed-event-target';
+import {type RemoveListenerCallback} from 'typed-event-target';
 
 /**
  * The base shape for an observable. Useful for determining if any object is an observable without
@@ -35,7 +35,7 @@ export type ObservableBase = typeof observableBaseShape.runtimeType;
 /**
  * Checks if the given value matches the expected base observable shape.
  *
- * @category Util
+ * @category Internal
  */
 export function isObservableBase(input: unknown): input is ObservableBase {
     return isValidShape(input, observableBaseShape, {allowExtraKeys: true});

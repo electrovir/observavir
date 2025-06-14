@@ -1,9 +1,9 @@
 import {assert, check} from '@augment-vir/assert';
-import {MaybePromise, getOrSet, wait} from '@augment-vir/common';
+import {type MaybePromise, getOrSet, wait} from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {IntervalObservable, IntervalObservableInit} from './interval-observable.js';
+import {IntervalObservable, type IntervalObservableInit} from './interval-observable.js';
 import {noUpdate} from './no-update.js';
-import {ObservableEventTypes, allObservableEvents} from './observable-events.js';
+import {type ObservableEventTypes, allObservableEvents} from './observable-events.js';
 
 describe(IntervalObservable.name, () => {
     async function testIntervalObservable(

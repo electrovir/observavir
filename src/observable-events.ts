@@ -1,5 +1,5 @@
-import {ArrayElement} from '@augment-vir/common';
-import {FullDate} from 'date-vir';
+import {type ArrayElement} from '@augment-vir/common';
+import {type FullDate} from 'date-vir';
 import {defineTypedCustomEvent, defineTypedEvent} from 'typed-event-target';
 
 /**

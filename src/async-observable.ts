@@ -1,25 +1,25 @@
 import {check} from '@augment-vir/assert';
-import {DeferredPromise, MaybePromise, ensureError, randomString} from '@augment-vir/common';
-import {Simplify, Writable} from 'type-fest';
-import {RemoveListenerCallback} from 'typed-event-target';
-import {AnyObservable, ObservableListener} from './any-observable.js';
+import {DeferredPromise, type MaybePromise, ensureError, randomString} from '@augment-vir/common';
+import {type Simplify, type Writable} from 'type-fest';
+import {type RemoveListenerCallback} from 'typed-event-target';
+import {AnyObservable, type ObservableListener} from './any-observable.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';
-import {EqualityCheck} from './equality-check.js';
-import {AllowNoUpdate, ExcludeNoUpdate, isNotNoUpdate} from './no-update.js';
+import {type EqualityCheck} from './equality-check.js';
+import {type AllowNoUpdate, type ExcludeNoUpdate, isNotNoUpdate} from './no-update.js';
 import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events.js';
 
 /**
  * The possible types for an async observable's value, each representing a different potential phase
  * in the promise lifecycle.
  *
- * @category Type
+ * @category Internal
  */
 export type AsyncValue<Value> = Error | Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
 
 /**
  * Constructor input for {@link AsyncObservable}.
  *
- * @category Type
+ * @category Internal
  */
 export type AsyncObservableInit<Value> = Partial<{
     /** Starting value */

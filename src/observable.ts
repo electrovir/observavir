@@ -1,14 +1,14 @@
-import {Simplify} from 'type-fest';
-import {RemoveListenerCallback} from 'typed-event-target';
-import {AnyObservable, ObservableListener} from './any-observable.js';
+import {type Simplify} from 'type-fest';
+import {type RemoveListenerCallback} from 'typed-event-target';
+import {AnyObservable, type ObservableListener} from './any-observable.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';
-import {EqualityCheck} from './equality-check.js';
-import {AllowNoUpdate, ExcludeNoUpdate} from './no-update.js';
+import {type EqualityCheck} from './equality-check.js';
+import {type AllowNoUpdate, type ExcludeNoUpdate} from './no-update.js';
 
 /**
  * Constructor input for {@link Observable}.
  *
- * @category Type
+ * @category Internal
  */
 export type ObservableInit<Value> = {
     /** Starting value */

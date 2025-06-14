@@ -1,10 +1,16 @@
 import {assert, check, waitUntil} from '@augment-vir/assert';
-import {DeferredPromise, MaybePromise, getOrSet, randomString, wait} from '@augment-vir/common';
+import {
+    DeferredPromise,
+    type MaybePromise,
+    getOrSet,
+    randomString,
+    wait,
+} from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {AsyncValue} from './async-observable.js';
-import {CallbackObservable, CallbackObservableInit} from './callback-observable.js';
+import {type AsyncValue} from './async-observable.js';
+import {CallbackObservable, type CallbackObservableInit} from './callback-observable.js';
 import {noUpdate} from './no-update.js';
-import {ObservableEventTypes, allObservableEvents} from './observable-events.js';
+import {type ObservableEventTypes, allObservableEvents} from './observable-events.js';
 
 describe(CallbackObservable.name, () => {
     it('has correct types', () => {

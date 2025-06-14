@@ -1,26 +1,26 @@
-import {MaybePromise} from '@augment-vir/common';
-import {Writable} from 'type-fest';
+import {type MaybePromise} from '@augment-vir/common';
+import {type Writable} from 'type-fest';
 import {
-    ListenOptions,
-    ListenTarget,
-    RemoveListenerCallback,
-    TypedEventListenerWithRemoval,
     type ExtractEventByType,
     type ExtractEventTypes,
+    type ListenOptions,
+    ListenTarget,
+    type RemoveListenerCallback,
+    type TypedEventListenerWithRemoval,
 } from 'typed-event-target';
-import {EqualityCheck} from './equality-check.js';
+import {type EqualityCheck} from './equality-check.js';
 import {noUpdate} from './no-update.js';
-import {ObservableBase} from './observable-base.js';
+import {type ObservableBase} from './observable-base.js';
 import {
     ObservableDestroyEvent,
-    ObservableEvents,
+    type ObservableEvents,
     ObservableValueUpdateEvent,
 } from './observable-events.js';
 
 /**
  * A callback for listening to observable value changes.
  *
- * @category Type
+ * @category Internal
  */
 export type ObservableListener<Value> = (value: Value) => MaybePromise<void>;
 
