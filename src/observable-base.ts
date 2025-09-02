@@ -1,5 +1,5 @@
 import {type AnyFunction} from '@augment-vir/common';
-import {defineShape, isValidShape, unknownShape} from 'object-shape-tester';
+import {checkValidShape, defineShape, unknownShape} from 'object-shape-tester';
 import {type RemoveListenerCallback} from 'typed-event-target';
 
 /**
@@ -38,5 +38,5 @@ export type ObservableBase = typeof observableBaseShape.runtimeType;
  * @category Internal
  */
 export function isObservableBase(input: unknown): input is ObservableBase {
-    return isValidShape(input, observableBaseShape, {allowExtraKeys: true});
+    return checkValidShape(input, observableBaseShape, {allowExtraKeys: true});
 }

@@ -11,8 +11,8 @@ describe(isObservableBase.name, () => {
 
 describe('minimalObservableShape', () => {
     it('has actual functions for defaults', () => {
-        observableBaseShape.defaultValue.removeListener(() => {});
-        observableBaseShape.defaultValue.listen(false, () => {});
-        observableBaseShape.defaultValue.destroy();
+        observableBaseShape.default.removeListener(() => {});
+        observableBaseShape.default.listen(false, () => {});
+        observableBaseShape.default.destroy();
     });
 });
