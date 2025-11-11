@@ -36,6 +36,20 @@ export type AsyncObservableInit<Value> = Partial<{
 }>;
 
 /**
+ * The current state of an {@link AsyncValue}.
+ *
+ * @category Internal
+ */
+export enum AsyncValueState {
+    /** The `.value` Promise has been rejected. */
+    Rejected = 'rejected',
+    /** The `.value` Promise has not settled yet. */
+    Waiting = 'waiting',
+    /** The `.value` Promise has been resolved into an awaited value. */
+    Resolved = 'resolved',
+}
+
+/**
  * An observable that can handle promises and updates listeners for each stage in the promise
  * lifecycle. It also stores the last resolved value.
  *
@@ -200,5 +214,60 @@ export class AsyncObservable<Value> extends AnyObservable {
         callback: ObservableListener<Value>,
     ): RemoveListenerCallback {
         return super.listen(fireImmediately, callback);
+    }
+
+    /**
+     * The current `.value` if it has resolved or `undefined` if it has not.
+     *
+     * Use this sparingly, as it prevents you from handling errors. Prefer `settledValue` instead.
+     */
+    public get resolvedValue(): Value | undefined {
+        if (this.value instanceof Promise || this.value instanceof Error) {
+            return undefined;
+        } else {
+            return this.value;
+        }
+    }
+
+    /**
+     * The current `.value` if it has settled (into either a resolved value or an Error), or
+     * `undefined` if it has not.
+     */
+    public get settledValue(): Error | Value | undefined {
+        if (this.value instanceof Promise) {
+            return undefined;
+        } else {
+            return this.value;
+        }
+    }
+
+    /**
+     * The current `.value` as a promise.
+     *
+     * - If `.value` is currently an error, this returns a promise that immediately rejects with that
+     *   error.
+     * - If `.value` is currently a resolved value, this returns a promise that immediately resolves
+     *   to that value.
+     * - If `.value` is currently a promise, that promise is returned.
+     */
+    public get promiseValue(): Promise<Value> {
+        if (this.value instanceof Error) {
+            return Promise.reject(this.value);
+        } else if (this.value instanceof Promise) {
+            return this.value;
+        } else {
+            return Promise.resolve(this.value);
+        }
+    }
+
+    /** The state of the current `.value`. */
+    public get state(): AsyncValueState {
+        if (this.value instanceof Error) {
+            return AsyncValueState.Rejected;
+        } else if (this.value instanceof Promise) {
+            return AsyncValueState.Waiting;
+        } else {
+            return AsyncValueState.Resolved;
+        }
     }
 }

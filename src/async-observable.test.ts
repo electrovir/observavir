@@ -1,7 +1,17 @@
-import {assert, check} from '@augment-vir/assert';
-import {DeferredPromise, type MaybePromise, wrapPromiseInTimeout} from '@augment-vir/common';
+import {assert, assertWrap, check} from '@augment-vir/assert';
+import {
+    DeferredPromise,
+    wrapInTry,
+    wrapPromiseInTimeout,
+    type MaybePromise,
+} from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {AsyncObservable, type AsyncObservableInit, type AsyncValue} from './async-observable.js';
+import {
+    AsyncObservable,
+    AsyncValueState,
+    type AsyncObservableInit,
+    type AsyncValue,
+} from './async-observable.js';
 import {noUpdate} from './no-update.js';
 import {
     ObservableDestroyEvent,
@@ -51,6 +61,86 @@ describe(AsyncObservable.name, () => {
 
         return events;
     }
+
+    it('type guards', () => {
+        const myObservable = new AsyncObservable({
+            defaultValue: Promise.resolve('five'),
+        });
+
+        assert.tsType(myObservable.value).equals<AsyncValue<string>>();
+        assert.tsType(myObservable.value).equals<string | Promise<string> | Error>();
+
+        assert.tsType(myObservable.resolvedValue).equals<string | undefined>;
+        assert.tsType(myObservable.settledValue).equals<string | Error | undefined>;
+
+        assert.tsType(myObservable.promiseValue).equals<Promise<string>>();
+    });
+
+    it('handles a waiting promise', () => {
+        const deferredPromise = new DeferredPromise<string>();
+
+        const myObservable = new AsyncObservable({
+            defaultValue: deferredPromise.promise,
+        });
+
+        assert.instanceOf(myObservable.value, Promise);
+        assert.instanceOf(myObservable.promiseValue, Promise);
+        assert.isUndefined(myObservable.resolvedValue);
+        assert.isUndefined(myObservable.settledValue);
+
+        deferredPromise.reject();
+    });
+
+    it('handles a resolved promise', async () => {
+        const value = 'five';
+
+        const myObservable = new AsyncObservable({
+            defaultValue: Promise.resolve(value),
+        });
+
+        assert.strictEquals(await myObservable.promiseValue, value);
+        assert.strictEquals(myObservable.value, value);
+        assert.instanceOf(myObservable.promiseValue, Promise);
+        assert.strictEquals(myObservable.resolvedValue, value);
+        assert.strictEquals(myObservable.settledValue, value);
+    });
+
+    it('handles a rejected promise', async () => {
+        const error = new Error();
+
+        const myObservable = new AsyncObservable({
+            defaultValue: Promise.reject(error),
+        });
+
+        assert.strictEquals(await wrapInTry(() => myObservable.promiseValue), error);
+        assert.strictEquals(myObservable.value, error);
+        assert.instanceOf(myObservable.promiseValue, Promise);
+        assert.isUndefined(myObservable.resolvedValue);
+        assert.strictEquals(myObservable.settledValue, error);
+    });
+
+    it('gets resolved state', async () => {
+        const myObservable = new AsyncObservable({
+            defaultValue: Promise.resolve(''),
+        });
+        /** This type assertion _is_ necessary. */
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        assert.strictEquals(myObservable.state as AsyncValueState, AsyncValueState.Waiting);
+        await myObservable.value;
+        assert.strictEquals(myObservable.state, AsyncValueState.Resolved);
+    });
+
+    it('gets rejected state', async () => {
+        const myObservable = new AsyncObservable({
+            defaultValue: Promise.reject<string>(new Error()),
+        });
+        /** This type assertion _is_ necessary. */
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        assert.strictEquals(myObservable.state as AsyncValueState, AsyncValueState.Waiting);
+        const valuePromise = assertWrap.instanceOf(myObservable.value, Promise);
+        await assert.throws(() => valuePromise);
+        assert.strictEquals(myObservable.state, AsyncValueState.Rejected);
+    });
 
     itCases(testAsyncObservable, [
         {
