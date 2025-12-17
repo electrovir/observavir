@@ -1,5 +1,6 @@
 export * from './any-observable.js';
 export * from './async-observable.js';
+export * from './async-value.js';
 export * from './callback-observable.js';
 export * from './custom-equality-checker.js';
 export * from './equality-check.js';

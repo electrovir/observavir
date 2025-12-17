@@ -1,4 +1,4 @@
-import {assert, assertWrap, check} from '@augment-vir/assert';
+import {assert, check} from '@augment-vir/assert';
 import {
     DeferredPromise,
     wrapInTry,
@@ -6,12 +6,8 @@ import {
     type MaybePromise,
 } from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {
-    AsyncObservable,
-    AsyncValueState,
-    type AsyncObservableInit,
-    type AsyncValue,
-} from './async-observable.js';
+import {AsyncObservable, AsyncValueState, type AsyncObservableInit} from './async-observable.js';
+import {type AsyncValue} from './async-value.js';
 import {noUpdate} from './no-update.js';
 import {
     ObservableDestroyEvent,
@@ -137,8 +133,7 @@ describe(AsyncObservable.name, () => {
         /** This type assertion _is_ necessary. */
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         assert.strictEquals(myObservable.state as AsyncValueState, AsyncValueState.Waiting);
-        const valuePromise = assertWrap.instanceOf(myObservable.value, Promise);
-        await assert.throws(() => valuePromise);
+        await assert.throws(async () => await myObservable.value);
         assert.strictEquals(myObservable.state, AsyncValueState.Rejected);
     });
 
@@ -321,8 +316,7 @@ describe(AsyncObservable.name, () => {
                     deferredWrapper.reject('FAILURE');
 
                     await assert.throws(() =>
-                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
-                    );
+                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise));
                 },
             ],
             expect: {

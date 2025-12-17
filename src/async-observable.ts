@@ -3,18 +3,11 @@ import {DeferredPromise, type MaybePromise, ensureError, randomString} from '@au
 import {type Simplify, type Writable} from 'type-fest';
 import {type RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, type ObservableListener} from './any-observable.js';
+import {type AsyncValue} from './async-value.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';
 import {type EqualityCheck} from './equality-check.js';
 import {type AllowNoUpdate, type ExcludeNoUpdate, isNotNoUpdate} from './no-update.js';
 import {ObservableValueErrorEvent, ObservableValueResolveEvent} from './observable-events.js';
-
-/**
- * The possible types for an async observable's value, each representing a different potential phase
- * in the promise lifecycle.
- *
- * @category Internal
- */
-export type AsyncValue<Value> = Error | Promise<ExcludeNoUpdate<Value>> | ExcludeNoUpdate<Value>;
 
 /**
  * Constructor input for {@link AsyncObservable}.

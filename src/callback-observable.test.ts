@@ -7,7 +7,7 @@ import {
     wait,
 } from '@augment-vir/common';
 import {describe, it, itCases} from '@augment-vir/test';
-import {type AsyncValue} from './async-observable.js';
+import {type AsyncValue} from './async-value.js';
 import {CallbackObservable, type CallbackObservableInit} from './callback-observable.js';
 import {noUpdate} from './no-update.js';
 import {
