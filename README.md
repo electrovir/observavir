@@ -2,8 +2,6 @@
 
 Flexible and simple observables with multiple implementations.
 
-Supports CJS and ESM import.
-
 ## install
 
 ```sh
