@@ -571,4 +571,27 @@ describe(CallbackObservable.name, () => {
         assert.tsType(instance.lastResolvedValue).equals<string | undefined>();
         assert.tsType(instance.value).equals<AsyncValue<string>>();
     });
+
+    it('sets values and fires listeners on every setValue call when equalityCheck is undefined', () => {
+        const results: string[] = [];
+
+        const instance = new CallbackObservable({
+            defaultValue: 'hi',
+            equalityCheck: undefined,
+        });
+
+        instance.listen(false, (newValue) => {
+            results.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue('hi');
+        instance.setValue('hi');
+
+        assert.deepEquals(results, [
+            'hi',
+            'hi',
+            'hi',
+        ]);
+    });
 });

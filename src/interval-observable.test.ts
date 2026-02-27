@@ -329,4 +329,30 @@ describe(IntervalObservable.name, () => {
 
         assert.isBelow(updateCount, updateCountAfterDestroy + 5);
     });
+
+    it('sets values and fires listeners on every setValue call when equalityCheck is undefined', () => {
+        const results: string[] = [];
+
+        const instance = new IntervalObservable({
+            defaultValue: 'hi',
+            equalityCheck: undefined,
+            startPaused: true,
+        });
+
+        instance.listen(false, (newValue) => {
+            results.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue('hi');
+        instance.setValue('hi');
+
+        instance.destroy();
+
+        assert.deepEquals(results, [
+            'hi',
+            'hi',
+            'hi',
+        ]);
+    });
 });

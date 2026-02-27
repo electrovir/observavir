@@ -163,4 +163,24 @@ describe(Observable.name, () => {
         assert.deepEquals(results, [defaultValue]);
         assert.strictEquals(instance.getListenerCount(), 1);
     });
+
+    it('sets values and fires listeners on every setValue call when equalityCheck is undefined', () => {
+        const results: string[] = [];
+
+        const instance = new Observable({defaultValue: 'hi', equalityCheck: undefined});
+
+        instance.listen(false, (newValue) => {
+            results.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue('hi');
+        instance.setValue('hi');
+
+        assert.deepEquals(results, [
+            'hi',
+            'hi',
+            'hi',
+        ]);
+    });
 });

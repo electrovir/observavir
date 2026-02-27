@@ -63,9 +63,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
      * The function used to check equality between different values for params or `value`. This can
      * be manually set at any time to change the function used.
      */
-    public override equalityCheck: NonNullable<
-        CallbackObservableInit<Value, Params>['equalityCheck']
-    >;
+    public override equalityCheck: CallbackObservableInit<Value, Params>['equalityCheck'];
     /**
      * The last params for `updateCallback`. This can be set by the constructor, `updateTrigger`,
      * `forceUpdate`, or by `setParams`.
@@ -84,7 +82,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
 
     constructor(init: Readonly<CallbackObservableInit<Value, Params>> = {}) {
         super(init);
-        this.equalityCheck = init.equalityCheck || observableEqualityCheck;
+        this.equalityCheck = 'equalityCheck' in init ? init.equalityCheck : observableEqualityCheck;
         this.updateCallback = init.updateCallback;
         this.internalParams =
             'defaultParams' in init ? init.defaultParams : CallbackObservable.NotSet;
@@ -117,7 +115,7 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
         try {
             if (
                 this.internalParams === CallbackObservable.NotSet ||
-                !this.equalityCheck(newParams, this.internalParams)
+                !this.equalityCheck?.(newParams, this.internalParams)
             ) {
                 this.internalParams = newParams;
                 this.dispatch(new ObservableParamsUpdateEvent({detail: this.internalParams}));

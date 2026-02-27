@@ -44,12 +44,12 @@ export class Observable<Value> extends AnyObservable {
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck: NonNullable<ObservableInit<Value>['equalityCheck']>;
+    public override equalityCheck: ObservableInit<Value>['equalityCheck'];
 
     constructor(init: ObservableInit<Value>) {
         super();
         this.value = init.defaultValue;
-        this.equalityCheck = init.equalityCheck || observableEqualityCheck;
+        this.equalityCheck = 'equalityCheck' in init ? init.equalityCheck : observableEqualityCheck;
     }
 
     /**

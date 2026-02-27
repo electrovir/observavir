@@ -53,7 +53,7 @@ export class AsyncObservable<Value> extends AnyObservable {
      * The function used to check equality between different values. This can be manually set at any
      * time to change the function used.
      */
-    public override equalityCheck: NonNullable<AsyncObservableInit<Value>['equalityCheck']>;
+    public override equalityCheck: AsyncObservableInit<Value>['equalityCheck'];
     protected waitingForValueDeferredPromise = new DeferredPromise<ExcludeNoUpdate<Value>>();
     protected lastSetPromise: Promise<AllowNoUpdate<Value>> | undefined;
     /** Used to prevent setting different values from racing with each other. */
@@ -75,7 +75,7 @@ export class AsyncObservable<Value> extends AnyObservable {
 
     constructor(init: Readonly<AsyncObservableInit<Value>> = {}) {
         super();
-        this.equalityCheck = init.equalityCheck || observableEqualityCheck;
+        this.equalityCheck = 'equalityCheck' in init ? init.equalityCheck : observableEqualityCheck;
 
         if ('defaultValue' in init) {
             this.setValue(init.defaultValue);

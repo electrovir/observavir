@@ -567,4 +567,24 @@ describe(AsyncObservable.name, () => {
             assert.tsType(event.detail).equals<unknown>();
         });
     });
+
+    it('sets values and fires listeners on every setValue call when equalityCheck is undefined', () => {
+        const results: string[] = [];
+
+        const instance = new AsyncObservable({defaultValue: 'hi', equalityCheck: undefined});
+
+        instance.listen(false, (newValue) => {
+            results.push(newValue);
+        });
+
+        instance.setValue('hi');
+        instance.setValue('hi');
+        instance.setValue('hi');
+
+        assert.deepEquals(results, [
+            'hi',
+            'hi',
+            'hi',
+        ]);
+    });
 });
