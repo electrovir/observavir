@@ -52,12 +52,14 @@ describe(mapAsyncValue.name, () => {
             mapAsyncValue(undefined, () => {
                 ++callCount;
                 return noUpdate;
-            }));
+            }),
+        );
         assert.throws(() =>
             mapAsyncValue(Promise.resolve({}), () => {
                 ++callCount;
                 return noUpdate;
-            }));
+            }),
+        );
         await mapAsyncValue({}, () => {
             ++callCount;
             return undefined;

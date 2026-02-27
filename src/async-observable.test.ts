@@ -316,7 +316,8 @@ describe(AsyncObservable.name, () => {
                     deferredWrapper.reject('FAILURE');
 
                     await assert.throws(() =>
-                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise));
+                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
+                    );
                 },
             ],
             expect: {
