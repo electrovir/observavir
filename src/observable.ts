@@ -1,4 +1,4 @@
-import {type Simplify} from 'type-fest';
+import {type Simplify} from '@augment-vir/common';
 import {type RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, type ObservableListener} from './any-observable.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';

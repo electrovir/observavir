@@ -1,5 +1,4 @@
-import {type MaybePromise} from '@augment-vir/common';
-import {type Writable} from 'type-fest';
+import {type MaybePromise, type Writable} from '@augment-vir/common';
 import {
     type ExtractEventByType,
     type ExtractEventTypes,
@@ -38,7 +37,7 @@ export type ObservableListener<Value> = (
  * @category Internal
  */
 export abstract class AnyObservable implements ObservableBase {
-    private listenTarget = new ListenTarget<ObservableEvents>();
+    protected listenTarget = new ListenTarget<ObservableEvents>();
 
     /**
      * The value currently contained with the observable.

@@ -6,16 +6,24 @@ describe(observableEqualityCheck.name, () => {
         {
             it: 'passes with object entry equality',
             inputs: [
-                {a: 'a'},
-                {a: 'a'},
+                {
+                    a: 'a',
+                },
+                {
+                    a: 'a',
+                },
             ],
             expect: true,
         },
         {
             it: 'rejects with object entry inequality',
             inputs: [
-                {a: 'a'},
-                {a: 'b'},
+                {
+                    a: 'a',
+                },
+                {
+                    a: 'b',
+                },
             ],
             expect: false,
         },
@@ -23,7 +31,9 @@ describe(observableEqualityCheck.name, () => {
             it: 'fails a function compared to an object',
             inputs: [
                 () => {},
-                {a: 'a'},
+                {
+                    a: 'a',
+                },
             ],
             expect: false,
         },
@@ -31,7 +41,9 @@ describe(observableEqualityCheck.name, () => {
             it: 'fails a string compared to an object',
             inputs: [
                 'a',
-                {a: 'a'},
+                {
+                    a: 'a',
+                },
             ],
             expect: false,
         },

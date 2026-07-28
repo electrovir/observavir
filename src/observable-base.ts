@@ -38,5 +38,5 @@ export type ObservableBase = typeof observableBaseShape.runtimeType;
  * @category Internal
  */
 export function isObservableBase(input: unknown): input is ObservableBase {
-    return checkValidShape(input, observableBaseShape, {allowExtraKeys: true});
+    return checkValidShape(input, observableBaseShape);
 }

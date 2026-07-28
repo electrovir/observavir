@@ -1,6 +1,5 @@
 import {check} from '@augment-vir/assert';
-import {type MaybePromise, ensureError} from '@augment-vir/common';
-import {type Simplify} from 'type-fest';
+import {type MaybePromise, type Simplify, ensureError} from '@augment-vir/common';
 import {AsyncObservable} from './async-observable.js';
 import {observableEqualityCheck} from './custom-equality-checker.js';
 import {type EqualityCheck} from './equality-check.js';
@@ -118,7 +117,11 @@ export class CallbackObservable<Value, Params = undefined> extends AsyncObservab
                 !this.equalityCheck?.(newParams, this.internalParams)
             ) {
                 this.internalParams = newParams;
-                this.dispatch(new ObservableParamsUpdateEvent({detail: this.internalParams}));
+                this.dispatch(
+                    new ObservableParamsUpdateEvent({
+                        detail: this.internalParams,
+                    }),
+                );
                 return true;
             }
 

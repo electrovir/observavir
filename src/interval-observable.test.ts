@@ -16,9 +16,13 @@ describe(IntervalObservable.name, () => {
     ) {
         const events: Partial<Record<ObservableEventTypes, string[]>> = {};
 
-        const equalityChecks: [any, any][] = [];
+        const equalityChecks: [
+            any,
+            any,
+        ][] = [];
 
         const instance = new IntervalObservable({
+            // eslint-disable-next-line @virmator/prefer-params-object
             equalityCheck(a: any, b: any) {
                 equalityChecks.push([
                     a,
@@ -56,7 +60,11 @@ describe(IntervalObservable.name, () => {
 
         return {
             ...events,
-            ...(equalityChecks.length ? {equalityChecks} : {}),
+            ...(equalityChecks.length
+                ? {
+                      equalityChecks,
+                  }
+                : {}),
             finalValue: String(instance.value),
             finalResolvedValue: String(instance.lastResolvedValue),
         };
@@ -71,11 +79,15 @@ describe(IntervalObservable.name, () => {
                     instance.update(2);
                     instance.update(3);
                     instance.setValue('fake value');
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                     instance.update(4);
                 },
                 {
-                    rateLimit: {seconds: 3},
+                    rateLimit: {
+                        seconds: 3,
+                    },
                     updateCallback(param: number) {
                         return param.toFixed(2);
                     },
@@ -135,11 +147,15 @@ describe(IntervalObservable.name, () => {
             it: 'automatically updates',
             inputs: [
                 async () => {
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                 },
                 {
                     defaultParams: 2,
-                    intervalDuration: {seconds: 3},
+                    intervalDuration: {
+                        seconds: 3,
+                    },
                     updateCallback(param: number) {
                         return param.toFixed(2);
                     },
@@ -174,14 +190,20 @@ describe(IntervalObservable.name, () => {
             it: 'pauses and resumes updates',
             inputs: [
                 async (instance) => {
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                     instance.pauseInterval();
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                     instance.resumeInterval();
                 },
                 {
                     defaultParams: 2,
-                    intervalDuration: {seconds: 3},
+                    intervalDuration: {
+                        seconds: 3,
+                    },
                     updateCallback(param: number) {
                         return param.toFixed(2);
                     },
@@ -223,11 +245,15 @@ describe(IntervalObservable.name, () => {
             inputs: [
                 async (instance) => {
                     assert.isFalse(instance.resumeInterval());
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                 },
                 {
                     defaultParams: 2,
-                    intervalDuration: {seconds: 3},
+                    intervalDuration: {
+                        seconds: 3,
+                    },
                     updateCallback(param: number) {
                         return param.toFixed(2);
                     },
@@ -263,11 +289,15 @@ describe(IntervalObservable.name, () => {
             inputs: [
                 async (instance) => {
                     assert.isFalse(instance.pauseInterval());
-                    await wait({seconds: 4.5});
+                    await wait({
+                        seconds: 4.5,
+                    });
                 },
                 {
                     defaultParams: 2,
-                    intervalDuration: {seconds: 3},
+                    intervalDuration: {
+                        seconds: 3,
+                    },
                     startPaused: true,
                     updateCallback(param: number) {
                         return param.toFixed(2);
@@ -283,11 +313,15 @@ describe(IntervalObservable.name, () => {
             it: 'does not update for noUpdate',
             inputs: [
                 async () => {
-                    await wait({seconds: 1});
+                    await wait({
+                        seconds: 1,
+                    });
                 },
                 {
                     defaultParams: undefined,
-                    intervalDuration: {seconds: 10},
+                    intervalDuration: {
+                        seconds: 10,
+                    },
                     updateCallback() {
                         return noUpdate;
                     },
@@ -311,21 +345,27 @@ describe(IntervalObservable.name, () => {
 
         const instance = new IntervalObservable({
             defaultParams: undefined,
-            intervalDuration: {milliseconds: 10},
+            intervalDuration: {
+                milliseconds: 10,
+            },
             updateCallback() {
                 updateCount++;
                 return 'hi';
             },
         });
 
-        await wait({seconds: 1});
+        await wait({
+            seconds: 1,
+        });
 
         assert.isAbove(updateCount, 2);
 
         instance.destroy();
         const updateCountAfterDestroy = updateCount;
 
-        await wait({seconds: 1});
+        await wait({
+            seconds: 1,
+        });
 
         assert.isBelow(updateCount, updateCountAfterDestroy + 5);
     });

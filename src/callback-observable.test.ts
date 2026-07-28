@@ -57,7 +57,10 @@ describe(CallbackObservable.name, () => {
     ) {
         const events: Partial<Record<ObservableEventTypes, string[]>> = {};
 
-        const equalityChecks: [any, any][] = [];
+        const equalityChecks: [
+            any,
+            any,
+        ][] = [];
 
         const instance = new CallbackObservable({
             equalityCheck(a, b) {
@@ -88,7 +91,11 @@ describe(CallbackObservable.name, () => {
 
         return {
             ...events,
-            ...(equalityChecks.length ? {equalityChecks} : {}),
+            ...(equalityChecks.length
+                ? {
+                      equalityChecks,
+                  }
+                : {}),
             finalValue: String(instance.value),
             finalResolvedValue: String(instance.lastResolvedValue),
         };
@@ -496,7 +503,9 @@ describe(CallbackObservable.name, () => {
 
     it('ignores ongoing callbacks if setValue is called', async () => {
         let resolved = false;
-        const updateDuration = {milliseconds: 500};
+        const updateDuration = {
+            milliseconds: 500,
+        };
 
         const instance = new CallbackObservable({
             async updateCallback() {
@@ -515,7 +524,9 @@ describe(CallbackObservable.name, () => {
 
         assert.isFalse(resolved);
         await waitUntil.isTruthy(() => resolved);
-        await wait({milliseconds: updateDuration.milliseconds * 2});
+        await wait({
+            milliseconds: updateDuration.milliseconds * 2,
+        });
         assert.strictEquals(instance.value as unknown, 42);
     });
 

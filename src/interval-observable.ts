@@ -1,4 +1,9 @@
-import {type Overwrite, type PartialWithUndefined, wrapInTry} from '@augment-vir/common';
+import {
+    type Overwrite,
+    type PartialWithUndefined,
+    type Writable,
+    wrapInTry,
+} from '@augment-vir/common';
 import {
     type AnyDuration,
     type FullDate,
@@ -7,7 +12,6 @@ import {
     getNowInUserTimezone,
     isDateAfter,
 } from 'date-vir';
-import {type Writable} from 'type-fest';
 import {type AsyncObservable} from './async-observable.js';
 import {
     CallbackObservable,
@@ -94,10 +98,15 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
     /** Sets a timeout and runts the update once its finished. */
     protected setInterval() {
         const duration =
-            this.intervalDuration && convertDuration(this.intervalDuration, {milliseconds: true});
+            this.intervalDuration &&
+            convertDuration(this.intervalDuration, {
+                milliseconds: true,
+            });
 
         if (!duration) {
-            const reasons = {hasInterval: false};
+            const reasons = {
+                hasInterval: false,
+            };
             this.dispatch(
                 new ObservableIntervalSkipEvent({
                     detail: reasons,
@@ -133,7 +142,10 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
         const hasCallback: boolean = !!this.updateCallback;
         const hasParams: boolean = this.internalParams !== CallbackObservable.NotSet;
 
-        const reasons = {hasCallback, hasParams};
+        const reasons = {
+            hasCallback,
+            hasParams,
+        };
 
         /* node:coverage ignore next 5: just covering a potential edge case */
         wrapInTry(() => this.setInterval(), {
@@ -143,10 +155,18 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
         });
 
         if (hasCallback && hasParams) {
-            this.dispatch(new ObservableIntervalRunEvent({detail: this.internalParams}));
+            this.dispatch(
+                new ObservableIntervalRunEvent({
+                    detail: this.internalParams,
+                }),
+            );
             return this.forceUpdate();
         } else {
-            this.dispatch(new ObservableIntervalSkipEvent({detail: reasons}));
+            this.dispatch(
+                new ObservableIntervalSkipEvent({
+                    detail: reasons,
+                }),
+            );
             console.warn(`Skipped ${IntervalObservable.name} interval:`, reasons);
 
             return false;
@@ -166,7 +186,11 @@ export class IntervalObservable<Value, Params> extends CallbackObservable<Value,
                 relativeTo: calculateRelativeDate(this.lastSetTime, this.rateLimit),
             })
         ) {
-            this.dispatch(new ObservableIntervalRateLimitedEvent({detail: this.lastSetTime}));
+            this.dispatch(
+                new ObservableIntervalRateLimitedEvent({
+                    detail: this.lastSetTime,
+                }),
+            );
             return true;
         }
 

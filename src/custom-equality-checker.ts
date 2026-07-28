@@ -10,6 +10,7 @@ import {check, checkCustomDeepQuality} from '@augment-vir/assert';
  *
  * @category Internal
  */
+// eslint-disable-next-line @virmator/prefer-params-object
 export function observableEqualityCheck(a: unknown, b: unknown): boolean {
     return checkCustomDeepQuality(a, b, (c, d) => {
         if (check.isFunction(c) && check.isFunction(d)) {

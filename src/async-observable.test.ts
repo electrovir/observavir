@@ -26,7 +26,10 @@ describe(AsyncObservable.name, () => {
             resolved: [] as any[],
             valueUpdate: [] as string[],
             destroyed: [] as true[],
-            equalityChecks: [] as [any, any][],
+            equalityChecks: [] as [
+                any,
+                any,
+            ][],
         };
 
         const instance = new AsyncObservable({
@@ -120,7 +123,7 @@ describe(AsyncObservable.name, () => {
             defaultValue: Promise.resolve(''),
         });
         /** This type assertion _is_ necessary. */
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
         assert.strictEquals(myObservable.state as AsyncValueState, AsyncValueState.Waiting);
         await myObservable.value;
         assert.strictEquals(myObservable.state, AsyncValueState.Resolved);
@@ -131,7 +134,7 @@ describe(AsyncObservable.name, () => {
             defaultValue: Promise.reject<string>(new Error()),
         });
         /** This type assertion _is_ necessary. */
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
         assert.strictEquals(myObservable.state as AsyncValueState, AsyncValueState.Waiting);
         await assert.throws(async () => await myObservable.value);
         assert.strictEquals(myObservable.state, AsyncValueState.Rejected);
@@ -252,7 +255,12 @@ describe(AsyncObservable.name, () => {
                     assert.instanceOf(initialValuePromise, Promise);
                     instance.setValue('first value');
                     assert.strictEquals(
-                        await wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
+                        await wrapPromiseInTimeout(
+                            {
+                                milliseconds: 100,
+                            },
+                            initialValuePromise,
+                        ),
                         'first value',
                     );
                     const deferredWrapper = new DeferredPromise<string>();
@@ -287,7 +295,12 @@ describe(AsyncObservable.name, () => {
 
                     deferredWrapper.resolve('here is a value');
                     assert.strictEquals(
-                        await wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
+                        await wrapPromiseInTimeout(
+                            {
+                                milliseconds: 100,
+                            },
+                            initialValuePromise,
+                        ),
                         'here is a value',
                     );
                 },
@@ -316,7 +329,12 @@ describe(AsyncObservable.name, () => {
                     deferredWrapper.reject('FAILURE');
 
                     await assert.throws(() =>
-                        wrapPromiseInTimeout({milliseconds: 100}, initialValuePromise),
+                        wrapPromiseInTimeout(
+                            {
+                                milliseconds: 100,
+                            },
+                            initialValuePromise,
+                        ),
                     );
                 },
             ],
@@ -571,7 +589,10 @@ describe(AsyncObservable.name, () => {
     it('sets values and fires listeners on every setValue call when equalityCheck is undefined', () => {
         const results: string[] = [];
 
-        const instance = new AsyncObservable({defaultValue: 'hi', equalityCheck: undefined});
+        const instance = new AsyncObservable({
+            defaultValue: 'hi',
+            equalityCheck: undefined,
+        });
 
         instance.listen(false, (newValue) => {
             results.push(newValue);

@@ -1,6 +1,12 @@
 import {check} from '@augment-vir/assert';
-import {DeferredPromise, type MaybePromise, ensureError, randomString} from '@augment-vir/common';
-import {type Simplify, type Writable} from 'type-fest';
+import {
+    DeferredPromise,
+    type MaybePromise,
+    type Simplify,
+    type Writable,
+    ensureError,
+    randomString,
+} from '@augment-vir/common';
 import {type RemoveListenerCallback} from 'typed-event-target';
 import {AnyObservable, type ObservableListener} from './any-observable.js';
 import {type AsyncValue} from './async-value.js';
@@ -151,7 +157,11 @@ export class AsyncObservable<Value> extends AnyObservable {
         if (!this.waitingForValueDeferredPromise.isSettled) {
             this.waitingForValueDeferredPromise.resolve(value as ExcludeNoUpdate<Value>);
         }
-        this.dispatch(new ObservableValueResolveEvent({detail: value}));
+        this.dispatch(
+            new ObservableValueResolveEvent({
+                detail: value,
+            }),
+        );
         return true;
     }
 
@@ -162,7 +172,11 @@ export class AsyncObservable<Value> extends AnyObservable {
     protected rejectValue(error: Error) {
         this.waitingForValueDeferredPromise.reject(error);
         super.setValue(error, check.strictEquals);
-        this.dispatch(new ObservableValueErrorEvent({detail: error}));
+        this.dispatch(
+            new ObservableValueErrorEvent({
+                detail: error,
+            }),
+        );
     }
 
     /**

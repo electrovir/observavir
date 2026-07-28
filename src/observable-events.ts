@@ -10,9 +10,12 @@ import {defineTypedCustomEvent, defineTypedEvent} from 'typed-event-target';
  *
  * @category Event
  */
-export class ObservableValueUpdateEvent extends defineTypedCustomEvent<[unknown, unknown]>()(
-    'observable-value-update',
-) {}
+export class ObservableValueUpdateEvent extends defineTypedCustomEvent<
+    [
+        unknown,
+        unknown,
+    ]
+>()('observable-value-update') {}
 
 /**
  * This event is emitted from async observables when their value is resolved.
