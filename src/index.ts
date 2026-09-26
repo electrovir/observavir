@@ -9,3 +9,4 @@ export * from './no-update.js';
 export * from './observable-base.js';
 export * from './observable-events.js';
 export * from './observable.js';
+export * from './trigger.js';
