@@ -541,7 +541,7 @@ describe(CallbackObservable.name, () => {
 
         instance.update({
             a: 0,
-            b: () => {},
+            b() {},
         });
 
         assert.strictEquals(counter, 1);
@@ -549,7 +549,7 @@ describe(CallbackObservable.name, () => {
 
         instance.update({
             a: 0,
-            b: () => {},
+            b() {},
         });
 
         assert.strictEquals(counter, 1);

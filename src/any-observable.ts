@@ -141,9 +141,9 @@ export abstract class AnyObservable implements ObservableBase {
         /** The callback to fire when a new value is set on the observable. */
         callback: ObservableListener<any>,
     ): RemoveListenerCallback {
-        const mapped = (event: ObservableValueUpdateEvent) => {
+        function mapped(event: ObservableValueUpdateEvent) {
             return callback(...event.detail);
-        };
+        }
         this.listenerMap.set(callback, mapped);
 
         if (fireImmediately) {

@@ -55,9 +55,9 @@ describe(Observable.name, () => {
             defaultValue: 'hi',
         });
 
-        const callback = (newValue: string) => {
+        function callback(newValue: string) {
             results.push(newValue);
-        };
+        }
 
         instance.listen(false, callback);
 
@@ -186,7 +186,9 @@ describe(Observable.name, () => {
         new Observable({
             defaultValue: 'hi',
             // @ts-expect-error: wrong type for equality check callback
-            equalityCheck: ({a, b}: Readonly<{a: number; b: number}>) => true,
+            equalityCheck({a, b}: Readonly<{a: number; b: number}>) {
+                return true;
+            },
         });
 
         instance.listen(false, (value) => {

@@ -48,18 +48,18 @@ describe(mapAsyncValue.name, () => {
     it('errors on no update', async () => {
         let callCount = 0;
 
-        assert.throws(() =>
-            mapAsyncValue(undefined, () => {
+        assert.throws(() => {
+            return mapAsyncValue(undefined, () => {
                 ++callCount;
                 return noUpdate;
-            }),
-        );
-        assert.throws(() =>
-            mapAsyncValue(Promise.resolve({}), () => {
+            });
+        });
+        assert.throws(() => {
+            return mapAsyncValue(Promise.resolve({}), () => {
                 ++callCount;
                 return noUpdate;
-            }),
-        );
+            });
+        });
         await mapAsyncValue({}, () => {
             ++callCount;
             return undefined;

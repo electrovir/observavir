@@ -22,7 +22,6 @@ describe(IntervalObservable.name, () => {
         ][] = [];
 
         const instance = new IntervalObservable({
-            // eslint-disable-next-line @virmator/prefer-params-object
             equalityCheck(a: any, b: any) {
                 equalityChecks.push([
                     a,
