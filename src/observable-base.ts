@@ -1,5 +1,5 @@
 import {type AnyFunction} from '@augment-vir/common';
-import {checkValidShape, defineShape, unknownShape} from 'object-shape-tester';
+import {checkValidShape, defineShape} from 'object-shape-tester';
 import {type RemoveListenerCallback} from 'typed-event-target';
 
 /**
@@ -21,8 +21,6 @@ export const observableBaseShape = defineShape({
     removeListener(listener: AnyFunction): boolean {
         return false;
     },
-    /** The current value. */
-    value: unknownShape(),
 });
 
 /**
