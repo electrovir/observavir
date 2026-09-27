@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>observableEqualityCheck | observavir - v2.4.2</title><meta name="description" content="Documentation for observavir"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css?cache=1790549420371"/><link rel="stylesheet" href="../assets/highlight.css?cache=1790549420371"/><script defer src="../assets/main.js?cache=1790549420371"></script><script async src="../assets/icons.js?cache=1790549420371" id="tsd-icons-script"></script><script async src="../assets/search.js?cache=1790549420371" id="tsd-search-script"></script><script async src="../assets/navigation.js?cache=1790549420371" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>observableMarker | observavir - v2.4.2</title><meta name="description" content="Documentation for observavir"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css?cache=1790549420371"/><link rel="stylesheet" href="../assets/highlight.css?cache=1790549420371"/><script defer src="../assets/main.js?cache=1790549420371"></script><script async src="../assets/icons.js?cache=1790549420371" id="tsd-icons-script"></script><script async src="../assets/search.js?cache=1790549420371" id="tsd-search-script"></script><script async src="../assets/navigation.js?cache=1790549420371" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container"><a href="../index.html" class="title">observavir - v2.4.2</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
@@ -8,27 +8,15 @@
 <div class="col-content">
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
-<li><a href="" aria-current="page">observableEqualityCheck</a></li></ul>
-<h1>Function observableEqualityCheck</h1></div>
-<section class="tsd-panel">
-<ul class="tsd-signatures">
-<li class="">
-<div class="tsd-signature tsd-anchor-link" id="observableequalitycheck"><span class="tsd-kind-call-signature">observableEqualityCheck</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">a</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">b</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#observableequalitycheck" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
-<div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>A custom deep equality checker that:</p>
+<li><a href="" aria-current="page">observableMarker</a></li></ul>
+<h1>Variable observableMarker<code class="tsd-tag">Const</code></h1></div>
+<div class="tsd-signature"><span class="tsd-kind-variable">observableMarker</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-keyword">typeof</span> <a href="" class="tsd-signature-type tsd-kind-variable">observableMarker</a><span class="tsd-signature-symbol"> = ...</span></div>
+<div class="tsd-comment tsd-typography"><p>Marks an object as an observavir observable. <a href="../functions/isObservableBase.html" class="tsd-kind-function">isObservableBase</a> requires it so that objects
+which merely have <code>listen</code>, <code>removeListener</code>, and <code>destroy</code> methods (like typed-event-target
+listen targets) are not treated as observables.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Strictly compares primitives</li>
-<li>Considers all functions as equal</li>
-</ul>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">a</span>: <span class="tsd-signature-type">unknown</span></span></li>
-<li><span><span class="tsd-kind-parameter">b</span>: <span class="tsd-signature-type">unknown</span></span></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/b896347ba5dd7964253558b7462442333ac9c4f9/src/custom-equality-checker.ts#L14">src/custom-equality-checker.ts:14</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/b896347ba5dd7964253558b7462442333ac9c4f9/src/observable-base.ts#L13">src/observable-base.ts:13</a></li></ul></aside></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
