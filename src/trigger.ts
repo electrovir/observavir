@@ -1,7 +1,7 @@
 import {makeWritable} from '@augment-vir/common';
 import {type RemoveListenerCallback} from 'typed-event-target';
 import {type ObservableListener} from './any-observable.js';
-import {type ObservableBase} from './observable-base.js';
+import {type ObservableBase, observableMarker} from './observable-base.js';
 import {Observable} from './observable.js';
 
 /**
@@ -57,7 +57,11 @@ import {Observable} from './observable.js';
  * ```
  */
 export class Trigger<Value> implements ObservableBase {
-    /** Indicates whether the current value has been read or not. */
+    public readonly [observableMarker] = true as const;
+    /**
+     * `true` if `.trigger()` has been called since the last `.consumeValue()` or
+     * `.consumeTrigger()` call. Reading this does not consume the trigger.
+     */
     public readonly hasTrigger: boolean = false;
     protected readonly observable = new Observable<Value | undefined>({
         defaultValue: undefined,

@@ -9,7 +9,7 @@ import {
 } from 'typed-event-target';
 import {type EqualityCheck} from './equality-check.js';
 import {noUpdate} from './no-update.js';
-import {type ObservableBase} from './observable-base.js';
+import {type ObservableBase, observableMarker} from './observable-base.js';
 import {
     ObservableDestroyEvent,
     type ObservableEvents,
@@ -37,6 +37,7 @@ export type ObservableListener<Value> = (
  * @category Internal
  */
 export abstract class AnyObservable implements ObservableBase {
+    public readonly [observableMarker] = true as const;
     protected listenTarget = new ListenTarget<ObservableEvents>();
 
     /**

@@ -1,6 +1,16 @@
+import {check} from '@augment-vir/assert';
 import {type AnyFunction} from '@augment-vir/common';
 import {checkValidShape, defineShape} from 'object-shape-tester';
 import {type RemoveListenerCallback} from 'typed-event-target';
+
+/**
+ * Marks an object as an observavir observable. {@link isObservableBase} requires it so that objects
+ * which merely have `listen`, `removeListener`, and `destroy` methods (like typed-event-target
+ * listen targets) are not treated as observables.
+ *
+ * @category Internal
+ */
+export const observableMarker = Symbol.for('observavir-observable');
 
 /**
  * The base shape for an observable. Useful for determining if any object is an observable without
@@ -28,13 +38,21 @@ export const observableBaseShape = defineShape({
  *
  * @category Internal
  */
-export type ObservableBase = typeof observableBaseShape.runtimeType;
+export type ObservableBase = typeof observableBaseShape.runtimeType & {
+    readonly [observableMarker]: true;
+};
 
 /**
- * Checks if the given value matches the expected base observable shape.
+ * Checks if the given value is marked with {@link observableMarker} and matches the expected base
+ * observable shape.
  *
  * @category Internal
  */
 export function isObservableBase(input: unknown): input is ObservableBase {
-    return checkValidShape(input, observableBaseShape);
+    return (
+        check.isObject(input) &&
+        observableMarker in input &&
+        input[observableMarker] === true &&
+        checkValidShape(input, observableBaseShape)
+    );
 }
