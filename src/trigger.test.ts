@@ -8,12 +8,12 @@ describe(Trigger.name, () => {
         const instance = new Trigger<string>();
 
         const values = [
-            instance.value,
+            instance.consumeValue(),
         ];
         instance.trigger('a');
-        values.push(instance.value, instance.value);
+        values.push(instance.consumeValue(), instance.consumeValue());
         instance.trigger('a');
-        values.push(instance.value);
+        values.push(instance.consumeValue());
 
         assert.deepEquals(values, [
             undefined,
@@ -38,7 +38,7 @@ describe(Trigger.name, () => {
             'a',
             'a',
         ]);
-        assert.strictEquals(instance.value, 'a');
+        assert.strictEquals(instance.consumeValue(), 'a');
     });
 
     it('is an observable base', () => {
@@ -46,7 +46,7 @@ describe(Trigger.name, () => {
         instance.trigger('a');
 
         assert.isTrue(isObservableBase(instance));
-        assert.strictEquals(instance.value, 'a');
+        assert.strictEquals(instance.consumeValue(), 'a');
     });
 
     it('allows an empty trigger for a void value', () => {
@@ -56,7 +56,7 @@ describe(Trigger.name, () => {
         // @ts-expect-error: a non-void trigger requires a value
         new Trigger<string>().trigger();
 
-        assert.tsType(instance.value).equals<void | undefined>();
+        assert.tsType(instance.consumeValue()).equals<void | undefined>();
     });
 
     it('consumes the trigger once per trigger call', () => {
@@ -75,7 +75,7 @@ describe(Trigger.name, () => {
         ]);
     });
 
-    it('shares consumption between value and consumeTrigger', () => {
+    it('shares consumption between consumeValue and consumeTrigger', () => {
         const instance = new Trigger<string>();
 
         instance.trigger('a');
@@ -84,7 +84,7 @@ describe(Trigger.name, () => {
         assert.deepEquals(
             {
                 consumed,
-                value: instance.value,
+                value: instance.consumeValue(),
             },
             {
                 consumed: true,
@@ -134,5 +134,54 @@ describe(Trigger.name, () => {
         assert.deepEquals(results, [
             'a',
         ]);
+    });
+
+    it('tracks hasTrigger without consuming it', () => {
+        const instance = new Trigger<string>();
+
+        const results = [
+            instance.hasTrigger,
+        ];
+        instance.trigger('a');
+        results.push(instance.hasTrigger, instance.hasTrigger);
+
+        assert.deepEquals(results, [
+            false,
+            true,
+            true,
+        ]);
+        assert.strictEquals(instance.consumeValue(), 'a');
+    });
+
+    it('clears hasTrigger when consumed', () => {
+        const instance = new Trigger<string>();
+
+        instance.trigger('a');
+        instance.consumeValue();
+        const afterConsumeValue = instance.hasTrigger;
+
+        instance.trigger('b');
+        instance.consumeTrigger();
+        const afterConsumeTrigger = instance.hasTrigger;
+
+        assert.deepEquals(
+            {
+                afterConsumeValue,
+                afterConsumeTrigger,
+            },
+            {
+                afterConsumeValue: false,
+                afterConsumeTrigger: false,
+            },
+        );
+    });
+
+    it('does not clear hasTrigger when listeners fire', () => {
+        const instance = new Trigger<string>();
+
+        instance.listen(false, () => {});
+        instance.trigger('a');
+
+        assert.isTrue(instance.hasTrigger);
     });
 });

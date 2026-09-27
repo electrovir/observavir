@@ -1,3 +1,4 @@
+import {makeWritable} from '@augment-vir/common';
 import {type RemoveListenerCallback} from 'typed-event-target';
 import {type ObservableListener} from './any-observable.js';
 import {type ObservableBase} from './observable-base.js';
@@ -6,8 +7,11 @@ import {Observable} from './observable.js';
 /**
  * An observable meant for one-off commands rather than state. Same as {@link Observable} except that
  * values are set with `.trigger()`, every `.trigger()` call fires listeners (even when the same
- * value is sent twice), and reading `.value` consumes it: every read after the first returns
- * `undefined` until `.trigger()` is called again.
+ * value is sent twice), and there is no `.value` property. Read the value with `.consumeValue()`
+ * instead: every call after the first returns `undefined` until `.trigger()` is called again.
+ *
+ * `.consumeValue()` only yields the most recent trigger: earlier unread triggers are dropped. Use
+ * `.listen()` to receive every trigger.
  *
  * @category Observable
  * @example Reading a triggered value
@@ -17,10 +21,10 @@ import {Observable} from './observable.js';
  *
  * const commands = new Trigger<string>();
  *
- * commands.value; // undefined
+ * commands.consumeValue(); // undefined
  * commands.trigger('open');
- * commands.value; // 'open'
- * commands.value; // undefined (already consumed)
+ * commands.consumeValue(); // 'open'
+ * commands.consumeValue(); // undefined (already consumed)
  * ```
  *
  * @example Triggering without a value
@@ -49,12 +53,12 @@ import {Observable} from './observable.js';
  *
  * commands.trigger('open');
  * commands.trigger('open');
- * commands.value; // 'open'
+ * commands.consumeValue(); // 'open'
  * ```
  */
 export class Trigger<Value> implements ObservableBase {
     /** Indicates whether the current value has been read or not. */
-    protected isConsumed = true;
+    public readonly hasTrigger: boolean = false;
     protected readonly observable = new Observable<Value | undefined>({
         defaultValue: undefined,
         /** Always trigger. */
@@ -62,11 +66,16 @@ export class Trigger<Value> implements ObservableBase {
     });
 
     /**
-     * Gives you the most recent triggered value if the trigger has not been consumed. If the
-     * trigger has been consumed, returns `undefined`. In order to distinguish `void` or `undefined`
-     * set values from the trigger being consumed, use `consumeTrigger()` instead.
+     * Gives you the most recent triggered value if the trigger has not been consumed. In order to
+     * distinguish `void` or `undefined` set values from the trigger being consumed, use
+     * `consumeTrigger()` instead.
+     *
+     * @returns
+     *
+     *   - The latest unconsumed trigger value, if any.
+     *   - `undefined` is there is no unconsumed trigger.
      */
-    public get value(): Value | undefined {
+    public consumeValue(): Value | undefined {
         if (this.consumeTrigger()) {
             return this.observable.value;
         } else {
@@ -76,12 +85,13 @@ export class Trigger<Value> implements ObservableBase {
 
     /** Set a new value and fire all listeners, regardless of the current value. */
     public trigger(newValue: Awaited<Value>) {
-        this.isConsumed = false;
+        makeWritable(this).hasTrigger = true;
         return this.observable.setValue(newValue);
     }
 
     /**
-     * Tells you if there's an unconsumed trigger still, and then consumes it.
+     * Tells you if there's an unconsumed trigger, and then consumes it. Does not return the
+     * trigger's value, use `.consumeValue()` for that.
      *
      * @returns
      *
@@ -89,11 +99,11 @@ export class Trigger<Value> implements ObservableBase {
      *   - `false`: if the trigger has already been consumed.
      */
     public consumeTrigger(): boolean {
-        if (this.isConsumed) {
-            return false;
-        } else {
-            this.isConsumed = true;
+        if (this.hasTrigger) {
+            makeWritable(this).hasTrigger = false;
             return true;
+        } else {
+            return false;
         }
     }
 
