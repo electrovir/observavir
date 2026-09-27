@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Trigger | observavir - v2.4.0</title><meta name="description" content="Documentation for observavir"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css?cache=1790463548749"/><link rel="stylesheet" href="../assets/highlight.css?cache=1790463548749"/><script defer src="../assets/main.js?cache=1790463548749"></script><script async src="../assets/icons.js?cache=1790463548749" id="tsd-icons-script"></script><script async src="../assets/search.js?cache=1790463548749" id="tsd-search-script"></script><script async src="../assets/navigation.js?cache=1790463548749" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">observavir - v2.4.0</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Trigger | observavir - v2.4.1</title><meta name="description" content="Documentation for observavir"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css?cache=1790511297038"/><link rel="stylesheet" href="../assets/highlight.css?cache=1790511297038"/><script defer src="../assets/main.js?cache=1790511297038"></script><script async src="../assets/icons.js?cache=1790511297038" id="tsd-icons-script"></script><script async src="../assets/search.js?cache=1790511297038" id="tsd-search-script"></script><script async src="../assets/navigation.js?cache=1790511297038" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">observavir - v2.4.1</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -13,12 +13,14 @@
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>An observable meant for one-off commands rather than state. Same as <a href="Observable.html" class="tsd-kind-class">Observable</a> except that
 values are set with <code>.trigger()</code>, every <code>.trigger()</code> call fires listeners (even when the same
-value is sent twice), and reading <code>.value</code> consumes it: every read after the first returns
-<code>undefined</code> until <code>.trigger()</code> is called again.</p>
+value is sent twice), and there is no <code>.value</code> property. Read the value with <code>.consumeValue()</code>
+instead: every call after the first returns <code>undefined</code> until <code>.trigger()</code> is called again.</p>
+<p><code>.consumeValue()</code> only yields the most recent trigger: earlier unread triggers are dropped. Use
+<code>.listen()</code> to receive every trigger.</p>
 </div>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-example">
-<h4 class="tsd-anchor-link" id="example-reading-a-triggered-value">Example: Reading a triggered value<a href="#example-reading-a-triggered-value" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> {</span><span class="hl-4">Trigger</span><span class="hl-1">} </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;observavir&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">commands</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">Trigger</span><span class="hl-1">&lt;</span><span class="hl-7">string</span><span class="hl-1">&gt;();</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-4">value</span><span class="hl-1">; </span><span class="hl-8">// undefined</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-4">value</span><span class="hl-1">; </span><span class="hl-8">// &#39;open&#39;</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-4">value</span><span class="hl-1">; </span><span class="hl-8">// undefined (already consumed)</span>
+<h4 class="tsd-anchor-link" id="example-reading-a-triggered-value">Example: Reading a triggered value<a href="#example-reading-a-triggered-value" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> {</span><span class="hl-4">Trigger</span><span class="hl-1">} </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;observavir&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">commands</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">Trigger</span><span class="hl-1">&lt;</span><span class="hl-7">string</span><span class="hl-1">&gt;();</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">consumeValue</span><span class="hl-1">(); </span><span class="hl-8">// undefined</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">consumeValue</span><span class="hl-1">(); </span><span class="hl-8">// &#39;open&#39;</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">consumeValue</span><span class="hl-1">(); </span><span class="hl-8">// undefined (already consumed)</span>
 </code><button type="button">Copy</button></pre>
 
 </div>
@@ -28,7 +30,7 @@ value is sent twice), and reading <code>.value</code> consumes it: every read af
 
 </div>
 <div class="tsd-tag-example">
-<h4 class="tsd-anchor-link" id="example-listening-to-every-trigger">Example: Listening to every trigger<a href="#example-listening-to-every-trigger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> {</span><span class="hl-4">Trigger</span><span class="hl-1">} </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;observavir&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">commands</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">Trigger</span><span class="hl-1">&lt;</span><span class="hl-7">string</span><span class="hl-1">&gt;();</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">listen</span><span class="hl-1">(</span><span class="hl-5">false</span><span class="hl-1">, (</span><span class="hl-4">command</span><span class="hl-1">) </span><span class="hl-5">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-8">// fires twice with &#39;open&#39;, listeners do not consume the value</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-4">value</span><span class="hl-1">; </span><span class="hl-8">// &#39;open&#39;</span>
+<h4 class="tsd-anchor-link" id="example-listening-to-every-trigger">Example: Listening to every trigger<a href="#example-listening-to-every-trigger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> {</span><span class="hl-4">Trigger</span><span class="hl-1">} </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;observavir&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">commands</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">Trigger</span><span class="hl-1">&lt;</span><span class="hl-7">string</span><span class="hl-1">&gt;();</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">listen</span><span class="hl-1">(</span><span class="hl-5">false</span><span class="hl-1">, (</span><span class="hl-4">command</span><span class="hl-1">) </span><span class="hl-5">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-8">// fires twice with &#39;open&#39;, listeners do not consume the value</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">trigger</span><span class="hl-1">(</span><span class="hl-2">&#39;open&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">commands</span><span class="hl-1">.</span><span class="hl-0">consumeValue</span><span class="hl-1">(); </span><span class="hl-8">// &#39;open&#39;</span>
 </code><button type="button">Copy</button></pre>
 
 </div></div></section>
@@ -41,7 +43,7 @@ value is sent twice), and reading <code>.value</code> consumes it: every read af
 <ul class="tsd-hierarchy">
 <li><a href="../types/ObservableBase.html" class="tsd-signature-type tsd-kind-type-alias">ObservableBase</a></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L55">src/trigger.ts:55</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L59">src/trigger.ts:59</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -53,16 +55,13 @@ value is sent twice), and reading <code>.value</code> consumes it: every read af
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#isconsumed" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>is<wbr/>Consumed</span></a>
+<div class="tsd-index-list"><a href="#hastrigger" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>has<wbr/>Trigger</span></a>
 <a href="#observable" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>observable</span></a>
-</div></section>
-<section class="tsd-index-section">
-<h3 class="tsd-index-heading tsd-anchor-link" id="accessors">Accessors<a href="#accessors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#value-1" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>value</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#consumetrigger" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>consume<wbr/>Trigger</span></a>
+<a href="#consumevalue" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>consume<wbr/>Value</span></a>
 <a href="#destroy" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
 <a href="#listen" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listen</span></a>
 <a href="#removelistener" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Listener</span></a>
@@ -85,35 +84,18 @@ value is sent twice), and reading <code>.value</code> consumes it: every read af
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
-<section class="tsd-panel tsd-member tsd-is-protected">
-<h3 class="tsd-anchor-link" id="isconsumed"><code class="tsd-tag">Protected</code><span>is<wbr/>Consumed</span><a href="#isconsumed" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">isConsumed</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></div>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="hastrigger"><code class="tsd-tag">Readonly</code><span>has<wbr/>Trigger</span><a href="#hastrigger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">hasTrigger</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 <div class="tsd-comment tsd-typography"><p>Indicates whether the current value has been read or not.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L57">src/trigger.ts:57</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L61">src/trigger.ts:61</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
 <h3 class="tsd-anchor-link" id="observable"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>observable</span><a href="#observable" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">observable</span><span class="tsd-signature-symbol">:</span> <a href="Observable.html" class="tsd-signature-type tsd-kind-class">Observable</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L58">src/trigger.ts:58</a></li></ul></aside></section></section></details>
-<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
-<h2 class="tsd-anchor-link" id="accessors-1">Accessors<a href="#accessors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
-<section>
-<section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="value-1"><span>value</span><a href="#value-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li>
-<div class="tsd-signature" id="valuevalue"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">value</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></div>
-<div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Gives you the most recent triggered value if the trigger has not been consumed. If the
-trigger has been consumed, returns <code>undefined</code>. In order to distinguish <code>void</code> or <code>undefined</code>
-set values from the trigger being consumed, use <code>consumeTrigger()</code> instead.</p>
-</div>
-<h4 class="tsd-returns-title">Returns <a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
-<p>Implementation of ObservableBase.value</p>
-<ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L69">src/trigger.ts:69</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L62">src/trigger.ts:62</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -123,7 +105,8 @@ set values from the trigger being consumed, use <code>consumeTrigger()</code> in
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="consumetrigger-1"><span class="tsd-kind-call-signature">consumeTrigger</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#consumetrigger-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Tells you if there's an unconsumed trigger still, and then consumes it.</p>
+<div class="tsd-comment tsd-typography"><p>Tells you if there's an unconsumed trigger, and then consumes it. Does not return the
+trigger's value, use <code>.consumeValue()</code> for that.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><ul>
 <li><code>true</code>: if a trigger has not yet been consumed.
@@ -134,7 +117,27 @@ set values from the trigger being consumed, use <code>consumeTrigger()</code> in
 </ul>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L91">src/trigger.ts:91</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L101">src/trigger.ts:101</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="consumevalue"><span>consume<wbr/>Value</span><a href="#consumevalue" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="consumevalue-1"><span class="tsd-kind-call-signature">consumeValue</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#consumevalue-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gives you the most recent triggered value if the trigger has not been consumed. In order to
+distinguish <code>void</code> or <code>undefined</code> set values from the trigger being consumed, use
+<code>consumeTrigger()</code> instead.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><ul>
+<li>The latest unconsumed trigger value, if any.
+<ul>
+<li><code>undefined</code> is there is no unconsumed trigger.</li>
+</ul>
+</li>
+</ul>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L78">src/trigger.ts:78</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -146,7 +149,7 @@ set values from the trigger being consumed, use <code>consumeTrigger()</code> in
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Implementation of ObservableBase.destroy</p>
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L128">src/trigger.ts:128</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L138">src/trigger.ts:138</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="listen"><span>listen</span><a href="#listen" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -169,7 +172,7 @@ is.</p>
 <aside class="tsd-sources">
 <p>Implementation of ObservableBase.listen</p>
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L105">src/trigger.ts:105</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L115">src/trigger.ts:115</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="removelistener"><span>remove<wbr/>Listener</span><a href="#removelistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -187,7 +190,7 @@ it was never added in the first place).</p>
 <aside class="tsd-sources">
 <p>Implementation of ObservableBase.removeListener</p>
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L123">src/trigger.ts:123</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L133">src/trigger.ts:133</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="trigger"><span>trigger</span><a href="#trigger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -202,7 +205,7 @@ it was never added in the first place).</p>
 <li><span><span class="tsd-kind-parameter">newValue</span>: <span class="tsd-signature-type">Awaited</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#value">Value</a><span class="tsd-signature-symbol">&gt;</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/electrovir/observavir/blob/0773053206e0142a8d18e67e07d765b7dff202e0/src/trigger.ts#L78">src/trigger.ts:78</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/electrovir/observavir/blob/1ae2e05775e69f1624e0d3687c784b77b9091a24/src/trigger.ts#L87">src/trigger.ts:87</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -220,13 +223,11 @@ it was never added in the first place).</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#isconsumed" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>is<wbr/>Consumed</span></a><a href="#observable" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>observable</span></a></div></details>
-<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Accessors</summary>
-<div><a href="#value-1"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>value</span></a></div></details>
+<div><a href="#hastrigger"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>has<wbr/>Trigger</span></a><a href="#observable" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>observable</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#consumetrigger"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>consume<wbr/>Trigger</span></a><a href="#destroy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#listen"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listen</span></a><a href="#removelistener"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Listener</span></a><a href="#trigger"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>trigger</span></a></div></details></div></details></div>
+<div><a href="#consumetrigger"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>consume<wbr/>Trigger</span></a><a href="#consumevalue"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>consume<wbr/>Value</span></a><a href="#destroy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#listen"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listen</span></a><a href="#removelistener"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Listener</span></a><a href="#trigger"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>trigger</span></a></div></details></div></details></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../modules.html">observavir - v2.4.0</a>
+<nav class="tsd-navigation"><a href="../modules.html">observavir - v2.4.1</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
